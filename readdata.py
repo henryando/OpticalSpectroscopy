@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.io import loadmat
 import yaml
+import constants as const
 
 
 def read_metadata(relative_filepath):
@@ -10,6 +11,7 @@ def read_metadata(relative_filepath):
     ymlpath = relative_filepath[:-3] + "yml"
     stream = open(ymlpath, "r")
     metadict = yaml.safe_load(stream)
+
     return (metadict["temp"], metadict["acquisition_time"], metadict["sens"])
 
 
@@ -23,9 +25,44 @@ def read_excitation(relative_filepath):
     """
     rawdata = loadmat(relative_filepath)
     temp, _, sens = read_metadata(relative_filepath)
-    sig = np.sqrt(rawdata["lockinI"] ** 2 + rawdata["lockinQ"] ** 2)
 
-    return {"ex": rawdata["ActualWavelength"], "sig": sig, "temp": temp, "sens": sens}
+    # Rotate lockin phase to get maximum signal strength relative to noise
+    theta = np.arctan(np.mean(rawdata["lockinI"]) / np.mean(rawdata["lockinQ"]))
+    sig = np.cos(theta) * rawdata["lockinI"] + np.sin(theta) * rawdata["lockinQ"]
+    # Is this the right formula?
+
+    return {
+        # fmt:off
+        "ex": rawdata["ActualWavelength"],
+        "sig": sig,
+        "temp": temp,
+        "sens": sens
+        # fmt: on
+    }
 
 
-# fp = "Data/Fa/Fa_PbWO4,EDFA=867mA,gain=110dB,ExcitationScan,spectrometer=0.0nm,1490.0-1560.0nm,scan_rate=0.1nm_s.mat"
+def read_2dspectrum(relative_filepath):
+    """ Returns a dictionary with:
+
+    'ex' (excitation wavelengths),
+    'em' (emission wavelengths),
+    'spec' (the spectrum),
+    'temp' (the temperature),
+    'time' (the acquisition time in seconds).
+    """
+    rawdata = loadmat(relative_filepath)
+    temp, time, _ = read_metadata(relative_filepath)
+
+    return {
+        "ex": rawdata["ActualWavelength"],
+        "em": const.CALIBRATED_EMISSION,
+        # Convert signal to counts per second
+        "spec": (rawdata["Spectrum2D"] - const.READOUT_NOISE_COUNTS) / time,
+        # Is it a good idea to do this in every case?
+        "temp": temp,
+        "time": time,
+    }
+
+
+# fp = "Data/Fa/Fa_PbWO4,EDFA=867mA,gain=110dB,ExcitationScan,spectrometer=0.0nm,
+# 1490.0-1560.0nm,scan_rate=0.1nm_s.mat"

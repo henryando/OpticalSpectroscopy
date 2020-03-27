@@ -4,3 +4,6 @@ import numpy as np
 CALIBRATED_EMISSION = (
     np.linspace(1, 1024, 1024) + 1.46581267e04
 ) / 9.91909400e00 + 20.0
+
+# The readout noise counts we expect from each 
+READOUT_NOISE_COUNTS = 700
