@@ -8,9 +8,11 @@ def read_metadata(relative_filepath):
     """ Scrapes the metadata we care about: temperatures, acquisition times,
     lockin sensitivity.
     """
-    ymlpath = relative_filepath[:-3] + "yml"
-    stream = open(ymlpath, "r")
-    metadict = yaml.safe_load(stream)
+    with open(relative_filepath[:-3] + "yml", "r") as stream:
+        try:
+            metadict = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
 
     return (metadict["temp"], metadict["acquisition_time"], metadict["sens"])
 
@@ -46,7 +48,7 @@ def read_2dspectrum(relative_filepath):
 
     'ex' (excitation wavelengths),
     'em' (emission wavelengths),
-    'spec' (the spectrum),
+    'spec' (the spectrum, in normalized counts per second),
     'temp' (the temperature),
     'time' (the acquisition time in seconds).
     """
