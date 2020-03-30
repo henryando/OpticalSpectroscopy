@@ -14,9 +14,9 @@ class ScanTypeError(Exception):
         self.relative_filepath = relative_filepath
 
 
-def get_filepaths(folder):
+def get_filepaths(relative_filepath):
     """Returns all the .mat filepaths for a given folder."""
-    return glob.glob("./Data/%s/*.mat" % folder)
+    return glob.glob("%s/*.mat" % relative_filepath)
 
 
 def read_metadata(relative_filepath):
