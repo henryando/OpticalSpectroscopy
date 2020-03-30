@@ -11,6 +11,11 @@ def logify_spectrum(spectrum):
     return np.log(spectrum)
 
 
+#######################################################################################
+# A key front-end function
+#######################################################################################
+
+
 def iterative_smooth(data, N=2, Wx=2, Wy=2):
     """Smooths a spectrum in both directions N times with a moving
     window of 2W+1 points. Window can be specified for both x and y.
@@ -36,6 +41,9 @@ def iterative_smooth(data, N=2, Wx=2, Wy=2):
         return data
     else:
         return np.exp(target[Wx:-Wx, Wy:-Wy])
+
+
+#######################################################################################
 
 
 def find_local_maxes_2d(data):
@@ -104,6 +112,11 @@ def filter_peaks_square_area(data, peaks, xrad, yrad):
     return peaks
 
 
+#######################################################################################
+# A key front-end function
+#######################################################################################
+
+
 def find_peaks(datadict, linewidth=0.2, noisefraction=(1 / 8)):
     """Takes the emission wavelength vector, excitation wavelength vector,
     spectrum (in the original scale, not log), and returns two vectors, expeaks
@@ -120,47 +133,17 @@ def find_peaks(datadict, linewidth=0.2, noisefraction=(1 / 8)):
     emrad = conv.linewidth_to_nsamples(emission, linewidth)
     exrad = conv.linewidth_to_nsamples(excitation, linewidth)
     noise = np.std(spectrum)
-    peaks = filter_peaks_square_mean(
+    peaks = filter_peaks_square_perimeter(
         spectrum, peaks, exrad, emrad, height=(noise * noisefraction)
     )
+    peaks = filter_peaks_square_area(spectrum, peaks, exrad, emrad)
     (xpeaks, ypeaks) = np.nonzero(peaks)
     peakdict = {"ex": excitation[ypeaks], "em": emission[xpeaks]}
-    peakdict = remove_bunched_up_peaks(peakdict, linewidth)
 
     return peakdict
 
 
-# def combine_scans(spectra):
-#     """Combines a list of spectra into one."""
-#     emission = spectra[0]["em"]
-#     temp = 0
-#     excitation = spectra[0]["ex"]
-#     spectrum = spectra[0]["spec"]
-#     for i in range(1, len(spectra)):
-#         excitation = np.concatenate((excitation, spectra[i]["ex"]))
-#         spectrum = np.concatenate((spectrum, spectra[i]["spec"]), axis=1)
-#         temp += float(spectra[i]["temp"])
-
-#     temp = temp / len(spectra)
-#     return {"ex": excitation, "em": emission, "spec": spectrum, "temp": temp}
-
-
-def remove_bunched_up_peaks(peakdict, linewidth):
-    """Remove peaks that are too close to each other."""
-    x = peakdict["ex"]
-    y = peakdict["em"]
-    for i in range(len(x)):
-        for j in range(i + 1, len(x)):
-            if np.sqrt((x[i] - x[j]) ** 2 + (y[i] - y[j]) ** 2) < linewidth:
-                x[i] = 0
-                y[i] = 0
-                x[j] = 0
-                y[j] = 0
-    x = x[x > 0]
-    y = y[y > 0]
-    peakdict["ex"] = x
-    peakdict["em"] = y
-    return peakdict
+#######################################################################################
 
 
 def plot_peaks(ax, peakdict):
