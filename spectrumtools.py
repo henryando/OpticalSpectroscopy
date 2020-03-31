@@ -1,7 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-from matplotlib import cm
 import conversions as conv
 
 
@@ -20,6 +17,19 @@ def iterative_smooth(data, N=2, Wx=2, Wy=2):
     """Smooths a spectrum in both directions N times with a moving
     window of 2W+1 points. Window can be specified for both x and y.
     """
+    if type(data) is list:
+        return [_iterative_smooth(d, N=N, Wx=Wx, Wy=Wy) for d in data]
+    else:
+        return iterative_smooth(data, N=N, Wx=Wx, Wy=Wy)
+
+
+#######################################################################################
+# Back end separated because of list comprehension reasons.
+#######################################################################################
+
+
+def _iterative_smooth(data, N=2, Wx=2, Wy=2):
+    """The actual code for iterative smooth."""
     if type(data) is dict:
         spectrum = logify_spectrum(data["spec"])
     else:
