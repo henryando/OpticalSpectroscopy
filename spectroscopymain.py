@@ -29,13 +29,11 @@ def find_peaks(spectra, linewidth=0.07, noisefraction=1 / 10):
     """Locates potential peaks based on the minimum permissible peak height
     (background noise time noisefraction) and the minimum permissible permissible
     linewidth over which the peak must be maximal. Then opens a GUI to select the
-    potential peaks which we actually want. Returns a dict with two entries,
-    'ex': excitation coordinates of peaks and 'em': emission coordinates of peaks.
+    potential peaks which we actually want. Returns a tuple with two entries,
+    excitation coordinates of peaks and emission coordinates of peaks.
     """
     goodpeaks = pfg.find_peaks(spectra, linewidth=linewidth, nf=noisefraction)
-    goodpeaks["ex"] = goodpeaks["ex"][0]  # Not really sure why I have to do this.
-    goodpeaks["em"] = goodpeaks["em"][0]
-    return goodpeaks
+    return (goodpeaks["ex"], goodpeaks["em"])
 
 
 def find_lines(spectra, peaks, Wx=0.3, Wy=1.5):
@@ -43,7 +41,12 @@ def find_lines(spectra, peaks, Wx=0.3, Wy=1.5):
     into lines by hand using a GUI. The rows and columns of the GUI are set by the
     linewidths Wx and Wy. Returns the lines in excitation and emission.
     """
-    return pgg.find_lines(spectra, peaks, grouping_Wx=Wx, grouping_Wy=Wy)
+    if type(peaks) is dict:
+        return pgg.find_lines(spectra, peaks, grouping_Wx=Wx, grouping_Wy=Wy)
+    else:
+        return pgg.find_lines(
+            spectra, {"ex": peaks[0], "em": peaks[1]}, grouping_Wx=Wx, grouping_Wy=Wy
+        )
 
 
 def plot_spectra(spectra, clevels=None, figsize=(7, 7), figure=None):
@@ -59,9 +62,15 @@ def plot_lines(lines):
 
 def plot_peaks(peaks):
     """Takes a peak dictionary. Plots the peaks with small red dots."""
-    pfg.plot_peaks(peaks["ex"], peaks["em"])
+    if type(peaks) is dict:
+        pfg.plot_peaks(peaks["ex"], peaks["em"])
+    else:
+        pfg.plot_peaks(peaks[0], peaks[1])
 
 
 def plot_good_peaks(peaks):
     """Takes a peak dictionary. Plots the peaks with big green dots."""
-    pfg.plot_good_peaks(peaks["ex"], peaks["em"])
+    if type(peaks) is dict:
+        pfg.plot_good_peaks(peaks["ex"], peaks["em"])
+    else:
+        pfg.plot_peaks(peaks[0], peaks[1])

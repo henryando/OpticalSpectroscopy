@@ -118,7 +118,7 @@ def plot_lines(lines, ax=None):
 def find_peaks(spectra, linewidth=0.07, nf=1 / 12):
     goodpeaks = {"ex": [], "em": []}
     for s in spectra:
-        peakdict = st.find_peaks(s, linewidth=linewidth, noisefraction=nf)
+        peakdict = st.find_potential_peaks(s, linewidth=linewidth, noisefraction=nf)
         print("There are %d peaks." % peakdict["em"].size)
         pc = PeakClicker(s, peakdict)
         print("Double click the good peaks, then quit the plot.")
@@ -132,6 +132,4 @@ def find_peaks(spectra, linewidth=0.07, nf=1 / 12):
     plot2d(spectra)
     plot_good_peaks(goodpeaks["ex"], goodpeaks["em"])
     plt.show()
-    goodpeaks["ex"] = goodpeaks["ex"][0]
-    goodpeaks["em"] = goodpeaks["em"][0]
     return goodpeaks
