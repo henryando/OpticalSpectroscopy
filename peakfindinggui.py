@@ -27,7 +27,7 @@ class PeakClicker:
             dist[i] = (x - self.xpeaks[i]) ** 2 + self.ar * (y - self.ypeaks[i]) ** 2
         dist = dist - np.amin(dist)
         self.goodpeaks[dist == 0] = 1
-        plot_good_peaks(self.xpeaks[self.goodpeaks], self.ypeaks[self.goodpeaks])
+        _plot_good_peaks(self.xpeaks[self.goodpeaks], self.ypeaks[self.goodpeaks])
         self.fig.canvas.draw()
 
     def good_peaks(self):
@@ -93,23 +93,11 @@ def plot_peaks(xdata, ydata, ax=None):
     ax.scatter(xdata, ydata, s=1, facecolors="none", edgecolors="r")
 
 
-def plot_good_peaks(xdata, ydata, ax=None):
+def _plot_good_peaks(xdata, ydata, ax=None):
     """Formatting in only one spot."""
     if ax is None:
         ax = plt.gca()
     ax.scatter(xdata, ydata, s=20, facecolors="g", edgecolors="g")
-
-
-def plot_lines(lines, ax=None):
-    """Plots the emission and excitation lines."""
-    if ax is None:
-        ax = plt.gca()
-    exlines = lines[0]
-    emlines = lines[1]
-    xlim = plt.xlim()
-    ylim = plt.ylim()
-    ax.plot((exlines, exlines), ylim, "r", linewidth=0.5)
-    ax.plot(xlim, (emlines, emlines), "r", linewidth=0.5)
 
 
 ####################################################################################
@@ -130,6 +118,6 @@ def find_peaks(spectra, linewidth=0.07, nf=1 / 12):
             (goodpeaks["em"], pc.good_peaks()["em"]), axis=0
         )
     plot2d(spectra)
-    plot_good_peaks(goodpeaks["ex"], goodpeaks["em"])
+    _plot_good_peaks(goodpeaks["ex"], goodpeaks["em"])
     plt.show()
     return goodpeaks

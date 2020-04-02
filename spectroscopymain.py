@@ -2,6 +2,7 @@ import spectrumtools as st
 import readdata as rd
 import peakfindinggui as pfg
 import peakgroupinggui as pgg
+import matplotlib.pyplot as plt
 
 
 def read_all_2dspectra(folder):
@@ -54,23 +55,26 @@ def plot_spectra(spectra, clevels=None, figsize=(7, 7), figure=None):
     return pfg.plot2d(spectra, clevels=clevels, figsize=figsize, inputfigure=figure)
 
 
-def plot_lines(lines):
-    """Takes a tuple of (excitation lines, emission lines). Plots them to the axis.
-    """
-    pfg.plot_lines(lines)
+def plot_lines(lines, fmt="g", ax=None):
+    """Plots the emission and excitation lines."""
+    if ax is None:
+        ax = plt.gca()
+    exlines = lines[0]
+    emlines = lines[1]
+    xlim = plt.xlim()
+    ylim = plt.ylim()
+    ax.plot([exlines, exlines], ylim, fmt, linewidth=0.5)
+    ax.plot(xlim, [emlines, emlines], fmt, linewidth=0.5)
 
 
-def plot_peaks(peaks):
+def plot_peaks(peaks, color="r", size=10, ax=None):
     """Takes a peak dictionary. Plots the peaks with small red dots."""
     if type(peaks) is dict:
-        pfg.plot_peaks(peaks["ex"], peaks["em"])
+        (x, y) = (peaks["ex"], peaks["em"])
     else:
-        pfg.plot_peaks(peaks[0], peaks[1])
+        (x, y) = (peaks[0], peaks[1])
 
+    if ax is None:
+        ax = plt.gca()
 
-def plot_good_peaks(peaks):
-    """Takes a peak dictionary. Plots the peaks with big green dots."""
-    if type(peaks) is dict:
-        pfg.plot_good_peaks(peaks["ex"], peaks["em"])
-    else:
-        pfg.plot_peaks(peaks[0], peaks[1])
+    ax.scatter(x, y, s=size, c=color)
