@@ -72,14 +72,17 @@ def read_2dspectrum(relative_filepath):
     """
     rawdata = loadmat(relative_filepath)
     temp, time, _ = read_metadata(relative_filepath)
+    ex = rawdata["ActualWavelength"][0]
+    # Convert signal to counts per second
+    spec = (rawdata["Spectrum2D"] - const.READOUT_NOISE_COUNTS) / time
+    spec = spec[ex > 0]
+    ex = ex[ex > 0]
 
     try:
         return {
-            "ex": rawdata["ActualWavelength"][0],
+            "ex": ex,
             "em": const.CALIBRATED_EMISSION,
-            # Convert signal to counts per second
-            "spec": (rawdata["Spectrum2D"] - const.READOUT_NOISE_COUNTS) / time,
-            # Is it a good idea to do this in every case?
+            "spec": spec,
             "temp": float(temp),
             "time": time,
         }
