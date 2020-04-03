@@ -5,13 +5,13 @@ import spectrumtools as st
 
 
 class PeakClicker:
-    def __init__(self, datadict, peakdict):
-        self.datadict = datadict
-        self.xpeaks = peakdict["ex"]
-        self.ypeaks = peakdict["em"]
+    def __init__(self, data, peaks):
+        self.datadict = data
+        self.xpeaks = peaks.ex
+        self.ypeaks = peaks.em
         self.N = self.xpeaks.size
         self.goodpeaks = np.zeros(self.N, dtype=bool)
-        self.fig, self.ax = plot2d(datadict)
+        self.fig, self.ax = plot2d(data)
         (xmin, xmax) = plt.xlim()
         (ymin, ymax) = plt.ylim()
         self.ar = (xmax - xmin) ** 2 / (ymax - ymin) ** 2
@@ -31,26 +31,23 @@ class PeakClicker:
         self.fig.canvas.draw()
 
     def good_peaks(self):
-        return {"ex": self.xpeaks[self.goodpeaks], "em": self.ypeaks[self.goodpeaks]}
+        return st.Peaks(self.xpeaks[self.goodpeaks], self.ypeaks[self.goodpeaks])
 
 
-def plot2d(datadict, clevels=None, figsize=(7, 7), inputfigure=None, xpixels=2000):
+def plot2d(data, clevels=None, figsize=(7, 7), inputfigure=None, xpixels=2000):
     """Plots a 2d spectrum without sideplots."""
-    if type(datadict) is list:
+    if type(data) is list:
         fig = plt.figure(figsize=figsize)
         ax = plt.subplot(111)
-        for d in datadict:
+        for d in data:
             plot2d(
-                d,
-                clevels=clevels,
-                inputfigure=fig,
-                xpixels=int(xpixels / len(datadict)),
+                d, clevels=clevels, inputfigure=fig, xpixels=int(xpixels / len(data)),
             )
         return fig, ax
 
-    excitation = datadict["ex"]
-    emission = datadict["em"]
-    spectrum = datadict["spec"]
+    excitation = data.ex
+    emission = data.em
+    spectrum = data.spec
 
     while len(excitation) > xpixels:
         excitation = excitation[0::2]
@@ -104,20 +101,16 @@ def _plot_good_peaks(xdata, ydata, ax=None):
 # The main function for this module.
 ####################################################################################
 def find_peaks(spectra, linewidth=0.07, nf=1 / 12):
-    goodpeaks = {"ex": [], "em": []}
+    goodpeaks = st.Peaks()
     for s in spectra:
-        peakdict = st.find_potential_peaks(s, linewidth=linewidth, noisefraction=nf)
-        print("There are %d peaks." % peakdict["em"].size)
-        pc = PeakClicker(s, peakdict)
+        peaks = st.find_potential_peaks(s, linewidth=linewidth, noisefraction=nf)
+        print("There are %d peaks." % peaks.em.size)
+        pc = PeakClicker(s, peaks)
         print("Double click the good peaks, then quit the plot.")
         plt.show()
-        goodpeaks["ex"] = np.concatenate(
-            (goodpeaks["ex"], pc.good_peaks()["ex"]), axis=0
-        )
-        goodpeaks["em"] = np.concatenate(
-            (goodpeaks["em"], pc.good_peaks()["em"]), axis=0
-        )
+        goodpeaks.ex = np.concatenate((goodpeaks.ex, pc.good_peaks().ex), axis=0)
+        goodpeaks.em = np.concatenate((goodpeaks.em, pc.good_peaks().em), axis=0)
     plot2d(spectra)
-    _plot_good_peaks(goodpeaks["ex"], goodpeaks["em"])
+    _plot_good_peaks(goodpeaks.ex, goodpeaks.em)
     plt.show()
     return goodpeaks

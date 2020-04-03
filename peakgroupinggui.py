@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import peakfindinggui as pfg
+import spectrumtools as st
 
 
 def _get_bins(wavelengths, linewidth):
@@ -30,7 +31,7 @@ def _occupancy_matrix(exbins, embins, expeaks, empeaks):
     return omatrix
 
 
-def _get_omatrix(data, peakdict, Wx, Wy):
+def _get_omatrix(data, peaks, Wx, Wy):
     """Gets the occupancy matrix, given either a single spectrum or a list
     of many spectra.
     """
@@ -40,24 +41,24 @@ def _get_omatrix(data, peakdict, Wx, Wy):
         emmins = np.zeros(len(data))
         emmaxs = np.zeros(len(data))
         for i in range(len(data)):
-            exmins[i] = min(data[i]["ex"])
-            exmaxs[i] = max(data[i]["ex"])
-            emmins[i] = min(data[i]["em"])
-            emmaxs[i] = max(data[i]["em"])
+            exmins[i] = min(data[i].ex)
+            exmaxs[i] = max(data[i].ex)
+            emmins[i] = min(data[i].em)
+            emmaxs[i] = max(data[i].em)
         exmin = min(exmins)
         exmax = max(exmaxs)
         emmin = min(emmins)
         emmax = max(emmaxs)
     else:
-        exmin = min(data["ex"])
-        exmax = max(data["ex"])
-        emmin = min(data["em"])
-        emmax = max(data["em"])
+        exmin = min(data.ex)
+        exmax = max(data.ex)
+        emmin = min(data.em)
+        emmax = max(data.em)
 
     exbins = _get_bins((exmin, exmax), Wx)
     embins = _get_bins((emmin, emmax), Wy)
-    omatrix = _occupancy_matrix(exbins, embins, peakdict["ex"], peakdict["em"])
-    return omatrix, {"exbins": exbins, "embins": embins}
+    omatrix = _occupancy_matrix(exbins, embins, peaks.ex, peaks.em)
+    return omatrix, exbins, embins
 
 
 def _get_occupied_cols(omatrix):
@@ -71,12 +72,12 @@ def _get_occupied_rows(omatrix):
 
 
 class PeakGrouper:
-    def __init__(self, datadict, peakdict, Wx, Wy, ax=None):
-        self.datadict = datadict
-        self.peakdict = peakdict
-        self.omatrix, bins = _get_omatrix(datadict, peakdict, Wx, Wy)
-        self.exbins = bins["exbins"]
-        self.embins = bins["embins"]
+    def __init__(self, data, peaks, Wx, Wy, ax=None):
+        self.data = data
+        self.peaks = peaks
+        self.omatrix, exbins, embins = _get_omatrix(data, peaks, Wx, Wy)
+        self.exbins = exbins
+        self.embins = embins
         self.cols = _get_occupied_cols(self.omatrix)
         self.rows = _get_occupied_rows(self.omatrix)
         if ax is None:
@@ -132,20 +133,20 @@ class PeakGrouper:
         goodcols = np.nonzero(self.cols * (self.cols - 1))[0]
         N = len(goodcols)
         wavelengths = np.zeros(N)
-        goodpeaks = {"ex": [], "em": []}
+        goodpeaks = st.Peaks()
         for i in range(N):
             peakinds = np.bitwise_and(
-                self.peakdict["ex"] > self.exbins[goodcols[i]],
-                self.peakdict["ex"] < self.exbins[goodcols[i] + 1],
+                self.peaks.ex > self.exbins[goodcols[i]],
+                self.peaks.ex < self.exbins[goodcols[i] + 1],
             )
-            wavelengths[i] = np.mean(self.peakdict["ex"][peakinds])
-            goodpeaks["ex"] = np.concatenate(
-                (goodpeaks["ex"], self.peakdict["ex"][peakinds]), axis=0
+            wavelengths[i] = np.mean(self.peaks.ex[peakinds])
+            goodpeaks.ex = np.concatenate(
+                (goodpeaks.ex, self.peaks.ex[peakinds]), axis=0
             )
-            goodpeaks["em"] = np.concatenate(
-                (goodpeaks["em"], self.peakdict["em"][peakinds]), axis=0
+            goodpeaks.em = np.concatenate(
+                (goodpeaks.em, self.peaks.em[peakinds]), axis=0
             )
-        self.peakdict = goodpeaks
+        self.peaks = goodpeaks
         self.omatrix[self.cols < 2] = 0
         return wavelengths
 
@@ -157,20 +158,20 @@ class PeakGrouper:
         print(goodrows)
         N = len(goodrows)
         wavelengths = np.zeros(N)
-        goodpeaks = {"ex": [], "em": []}
+        goodpeaks = st.Peaks()
         for i in range(N):
             peakinds = np.bitwise_and(
-                self.peakdict["em"] > self.embins[goodrows[i]],
-                self.peakdict["em"] < self.embins[goodrows[i] + 1],
+                self.peaks.em > self.embins[goodrows[i]],
+                self.peaks.em < self.embins[goodrows[i] + 1],
             )
-            wavelengths[i] = np.mean(self.peakdict["em"][peakinds])
-            goodpeaks["ex"] = np.concatenate(
-                (goodpeaks["ex"], self.peakdict["ex"][peakinds]), axis=0
+            wavelengths[i] = np.mean(self.peaks.em[peakinds])
+            goodpeaks.ex = np.concatenate(
+                (goodpeaks.ex, self.peaks.ex[peakinds]), axis=0
             )
-            goodpeaks["em"] = np.concatenate(
-                (goodpeaks["em"], self.peakdict["em"][peakinds]), axis=0
+            goodpeaks.em = np.concatenate(
+                (goodpeaks.em, self.peaks.em[peakinds]), axis=0
             )
-        self.peakdict = goodpeaks
+        self.peaks = goodpeaks
         self.omatrix[:, self.rows < 2] = 0
         return wavelengths
 
@@ -254,8 +255,11 @@ class PeakGrouper:
 # The main function for this module.
 ####################################################################################
 def find_lines(spectra, peaks, grouping_Wx=0.5, grouping_Wy=1):
+    if type(peaks) is not st.Peaks:
+        peaks = st.Peaks(peaks[0], peaks[1])
+
     fig, ax = pfg.plot2d(spectra)
-    pfg.plot_peaks(peaks["ex"], peaks["em"])
+    pfg.plot_peaks(peaks.ex, peaks.em)
     pg = PeakGrouper(spectra, peaks, grouping_Wx, grouping_Wy)
     pg.show_omatrix()
     try:
@@ -263,9 +267,9 @@ def find_lines(spectra, peaks, grouping_Wx=0.5, grouping_Wy=1):
     except RuntimeWarning:
         pass
 
-    peaks = pg.peakdict
+    peaks = pg.peaks
     fig, ax = pfg.plot2d(spectra)
-    pfg.plot_peaks(peaks["ex"], peaks["em"])
+    pfg.plot_peaks(peaks.ex, peaks.em)
     pg = PeakGrouper(spectra, peaks, grouping_Wx, grouping_Wy)
     pg.show_omatrix()
     try:

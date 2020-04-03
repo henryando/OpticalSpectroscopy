@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import spectroscopymain as sm
 
 # Give the path to the folder that contains the spectra you want.
-folder = "Data/JinD 3"
+folder = "Data/JinD 2"
 
 # Decide on parameters
 N = 4  # the number of smoothing iterations
@@ -31,6 +31,6 @@ lines = sm.find_lines(spectra, peaks, Wx=grouping_Wx, Wy=grouping_Wy)
 
 # Plot the peaks and lines on top of the spectrum
 sm.plot_spectra(spectra)
-sm.plot_good_peaks(peaks)
+sm.plot_peaks(peaks)
 sm.plot_lines(lines)
 plt.show()

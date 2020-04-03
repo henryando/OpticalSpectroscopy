@@ -2,6 +2,29 @@ import numpy as np
 import conversions as conv
 
 
+class Spectrum:
+    """A class to store 2D spectrum data."""
+
+    def __init__(self, ex, em, spec, temp, time):
+        self.ex = ex
+        self.em = em
+        self.spec = spec
+        self.temp = temp
+        self.time = time
+
+
+class Peaks:
+    """A class to store peak data."""
+
+    def __init__(self, *args):
+        if len(args) == 2:
+            self.ex = args[0]
+            self.em = args[1]
+        else:
+            self.ex = []
+            self.em = []
+
+
 #######################################################################################
 # The key front-end functions
 #######################################################################################
@@ -13,8 +36,8 @@ def iterative_smooth(data, N=2, Wx=2, Wy=2):
     """
     if type(data) is list:
         return [iterative_smooth(d, N=N, Wx=Wx, Wy=Wy) for d in data]
-    elif type(data) is dict:
-        spectrum = logify_spectrum(data["spec"])
+    elif type(data) is Spectrum:
+        spectrum = logify_spectrum(data.spec)
     else:
         spectrum = logify_spectrum(data)
 
@@ -29,14 +52,14 @@ def iterative_smooth(data, N=2, Wx=2, Wy=2):
         for j in range(sz[1]):
             target[:, j + Wy] = np.mean(target[:, j : (j + 1 + 2 * Wy)], axis=1)
 
-    if type(data) is dict:
-        data["spec"] = np.exp(target[Wx:-Wx, Wy:-Wy])
+    if type(data) is Spectrum:
+        data.spec = np.exp(target[Wx:-Wx, Wy:-Wy])
         return data
     else:
         return np.exp(target[Wx:-Wx, Wy:-Wy])
 
 
-def find_potential_peaks(datadict, linewidth=0.2, noisefraction=(1 / 8)):
+def find_potential_peaks(data, linewidth=0.2, noisefraction=(1 / 8)):
     """Takes the emission wavelength vector, excitation wavelength vector,
     spectrum (in the original scale, not log), and returns two vectors, expeaks
     and empeaks, which are the coordinates of the peaks that it found. Optional
@@ -44,22 +67,21 @@ def find_potential_peaks(datadict, linewidth=0.2, noisefraction=(1 / 8)):
     (2*linewidth), and the fraction of the noise level to force the peaks to be
     greater by (noisefraction).
     """
-    spectrum = datadict["spec"]
-    emission = datadict["em"]
-    excitation = datadict["ex"]
+    spectrum = data.spec
+    emission = data.em
+    excitation = data.ex
     spectrum = np.log(spectrum)
-    peaks = find_local_maxes_2d(spectrum)
+    peakmatrix = find_local_maxes_2d(spectrum)
     emrad = conv.linewidth_to_nsamples(emission, linewidth)
     exrad = conv.linewidth_to_nsamples(excitation, linewidth)
     noise = np.std(spectrum)
-    peaks = filter_peaks_square_perimeter(
-        spectrum, peaks, exrad, emrad, height=(noise * noisefraction)
+    peakmatrix = filter_peaks_square_perimeter(
+        spectrum, peakmatrix, exrad, emrad, height=(noise * noisefraction)
     )
-    peaks = filter_peaks_square_area(spectrum, peaks, exrad, emrad)
-    (xpeaks, ypeaks) = np.nonzero(peaks)
-    peakdict = {"ex": excitation[ypeaks], "em": emission[xpeaks]}
-
-    return peakdict
+    peaksmatrix = filter_peaks_square_area(spectrum, peakmatrix, exrad, emrad)
+    return Peaks(
+        data.ex[np.nonzero(peaksmatrix)[1]], data.em[np.nonzero(peaksmatrix)[0]]
+    )
 
 
 #######################################################################################

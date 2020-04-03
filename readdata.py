@@ -3,6 +3,7 @@ from scipy.io import loadmat
 import yaml
 import constants as const
 import glob
+from spectrumtools import Spectrum
 
 
 class ScanTypeError(Exception):
@@ -78,13 +79,7 @@ def read_2dspectrum(relative_filepath):
         spec = (rawdata["Spectrum2D"] - const.READOUT_NOISE_COUNTS) / time
         spec = spec[:, ex > 0]
         ex = ex[ex > 0]
-        return {
-            "ex": ex,
-            "em": const.CALIBRATED_EMISSION,
-            "spec": spec,
-            "temp": float(temp),
-            "time": time,
-        }
+        return Spectrum(ex, const.CALIBRATED_EMISSION, spec, float(temp), time)
     except KeyError:
         raise ScanTypeError(relative_filepath)
 
