@@ -1,4 +1,5 @@
 import numpy as np
+import conversions as conv
 import matplotlib.pyplot as plt
 import spectroscopymain as sm
 
@@ -10,7 +11,7 @@ N = 1
 Wx = 1
 Wy = 1
 
-# site = 3
+# site = 0
 # for folder in folders[1:]:
 #     peakfilename = folder + "/peaks.npy"
 #     linefilename = folder + "/lines%d.npy" % site
@@ -35,7 +36,9 @@ lines = np.load(folders[2] + "/lines0.npy", allow_pickle=True)
 emlines = np.sort(lines[1])
 emlines = emlines[[0, 2, 3, 5, 6, 7]]
 exlines = np.sort(lines[0])
-np.save("Data/JinD/lines0.npy", (emlines, exlines))
+emlines = conv.nm_to_wavenumber(emlines)
+exlines = conv.nm_to_wavenumber(exlines)
+np.save("Data/JinD/lines0.npy", (exlines, emlines))
 
 
 # site 2:
@@ -43,7 +46,9 @@ lines = np.load(folders[2] + "/lines1.npy", allow_pickle=True)
 emlines = np.sort(lines[1])
 emlines = emlines[1:]
 exlines = np.sort(lines[0])
-np.save("Data/JinD/lines1.npy", (emlines, exlines))
+emlines = conv.nm_to_wavenumber(emlines)
+exlines = conv.nm_to_wavenumber(exlines)
+np.save("Data/JinD/lines1.npy", (exlines, emlines))
 
 # site 3:
 lines = np.load(folders[1] + "/lines2.npy", allow_pickle=True)
@@ -51,11 +56,15 @@ exlines = np.sort(lines[0])[1:]
 lines = np.load(folders[2] + "/lines2.npy", allow_pickle=True)
 exlines = np.concatenate((exlines, np.sort(lines[0])[0:1]))
 emlines = np.sort(lines[1])[[0, 1, 2, 3, 4, 5, 6, 8, 9, 10]]
-np.save("Data/JinD/lines2.npy", (emlines, exlines))
+emlines = conv.nm_to_wavenumber(emlines)
+exlines = conv.nm_to_wavenumber(exlines)
+np.save("Data/JinD/lines2.npy", (exlines, emlines))
 
 # site 4:
 lines = np.load(folders[3] + "/lines3.npy", allow_pickle=True)
 exlines = np.sort(lines[0])
 lines = np.load(folders[2] + "/lines3.npy", allow_pickle=True)
 emlines = np.sort(lines[1])
-np.save("Data/JinD/lines3.npy", (emlines, exlines))
+emlines = conv.nm_to_wavenumber(emlines)
+exlines = conv.nm_to_wavenumber(exlines)
+np.save("Data/JinD/lines3.npy", (exlines, emlines))

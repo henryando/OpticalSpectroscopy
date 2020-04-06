@@ -6,4 +6,4 @@ CALIBRATED_EMISSION = emission = (
 ) / 9.91909400e00 + 20.0
 
 # The readout noise counts we expect from each pixel of the array detector
-READOUT_NOISE_COUNTS = 550
+READOUT_NOISE_COUNTS = 600

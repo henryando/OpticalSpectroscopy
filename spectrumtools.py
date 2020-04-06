@@ -89,7 +89,7 @@ def find_potential_peaks(data, linewidth=0.2, noisefraction=(1 / 8)):
 
 def logify_spectrum(spectrum):
     """Converts a spectrum to log scale and fixes error values."""
-    spectrum[spectrum <= 0] = np.nan
+    spectrum[spectrum <= 0] = 0.5
     return np.log(spectrum)
 
 

@@ -4,6 +4,7 @@ import yaml
 import constants as const
 import glob
 from spectrumtools import Spectrum
+import conversions as conv
 
 
 class ScanTypeError(Exception):
@@ -78,8 +79,14 @@ def read_2dspectrum(relative_filepath):
         # Convert signal to counts per second
         spec = (rawdata["Spectrum2D"] - const.READOUT_NOISE_COUNTS) / time
         spec = spec[:, ex > 0]
-        ex = ex[ex > 0]
-        return Spectrum(ex, const.CALIBRATED_EMISSION, spec, float(temp), time)
+        ex = conv.nm_to_wavenumber(ex[ex > 0])
+        return Spectrum(
+            ex,
+            conv.nm_to_wavenumber(const.CALIBRATED_EMISSION),
+            spec,
+            float(temp),
+            time,
+        )
     except KeyError:
         raise ScanTypeError(relative_filepath)
 

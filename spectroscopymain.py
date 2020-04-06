@@ -1,3 +1,4 @@
+import numpy as np
 import spectrumtools as st
 import readdata as rd
 import peakfindinggui as pfg
@@ -73,3 +74,59 @@ def plot_peaks(peaks, color="r", size=10, ax=None):
         ax = plt.gca()
 
     ax.scatter(x, y, s=size, c=color)
+
+
+# def _em_at_given_ex(data, ex):
+#     if type(data) is list:
+#         for d in data:
+#             result = _em_at_given_ex(d, ex)
+#             if result is not None:
+#                 return result
+#     else:
+#         if (min(data.ex) < ex) and (ex < max(data.ex)):
+#             return data.spec[:, sum(data.ex < ex) + 1]
+
+
+# def peak_heights_at_lines(data, exlines, emlines):
+#     em = data[0].em
+#     peaks = np.zeros(len(exlines), len(emlines))
+
+
+def ex_line_nearest_peak(data, ex):
+    """Takes a spectrum and an excitation line, and returns the
+    emission line of the local max closest in excitation to the given
+    line.
+    """
+    if type(data) is list:
+        for s in data:
+            emspec = ex_line_nearest_peak(s, ex)
+            if emspec is not None:
+                # print("returning em")
+                return emspec
+    else:
+        if (ex < min(data.ex)) or (ex > max(data.ex)):
+            # print("out of bounds")
+            return None
+        else:
+            # print("in bounds")
+            ind = sum(data.ex >= ex)
+            return data.spec[:, ind + 1]
+
+
+def peak_heights_at_lines(data, exlines, emlines):
+    """Takes a spectrum and a set of lines, and returns an array with the spectral
+    strength at the intersection of all the lines.
+    """
+    peaks = np.zeros((len(exlines), len(emlines)))
+    em = data[0].em
+    for i in range(len(exlines)):
+        curr = ex_line_nearest_peak(data, exlines[i])
+        if curr is None:
+            peaks[i] = np.nan
+        else:
+            for j in range(len(emlines)):
+                peaks[i, j] = curr[sum(em > emlines[j]) + 1]
+
+    # peaks = peaks - np.amin(peaks)
+    # peaks = peaks / peaks[0, 0]
+    return peaks

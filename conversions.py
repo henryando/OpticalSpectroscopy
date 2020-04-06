@@ -2,9 +2,12 @@ import numpy as np
 import constants as const
 
 
-def nm_to_wavenumber(wavelength):
+def nm_to_wavenumber(data):
     """ Convert wavelength from nm to wavenumbers (cm^-1). """
-    return 1e7 / wavelength
+    if type(data) is list:
+        return [nm_to_wavenumber(s) for s in data]
+    else:
+        return 1e7 / data
 
 
 def linewidth_to_nsamples(wavelengths, linewidth):
