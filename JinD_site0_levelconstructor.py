@@ -27,7 +27,7 @@ ela = la.EnergyLevelsAssignments(lines[0], lines[1])
 ela.ylevels = ela.ylevels[[0, 1, 2, 4, 5]]
 newline = ela.y1z1 - newline + ela.ylevels[2]
 ela.zlevels = np.concatenate((ela.zlevels, [newline]), axis=0)
-ela.save_object("site0.npy")
+ela.save_object("Data/JinD/site0.pkl")
 
 
 sm.plot_spectra(spectra)

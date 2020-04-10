@@ -3,9 +3,8 @@ import matplotlib.pyplot as plt
 import spectroscopymain as sm
 import lineanalysis as la
 
-ela = la.load_object("Data/JinD/site0.pkl")
-fileformat = "Figures/JinD_site0_%dK.png"
-tempfilename = "Figures/JinD_site0_temp.png"
+ela = la.load_object("Data/JinD/site2.pkl")
+fileformat = "Figures/JinD_site2_%dK.png"
 
 folders = ("Data/JinD 0", "Data/JinD 1", "Data/JinD 2", "Data/JinD 3")
 temps = (13, 32, 60, 106)
@@ -30,22 +29,20 @@ if True:
     print("Y levels:")
     [print(l + ela.z1y1) for l in ela.ylevels]
 
-
 # 13K
 if False:
     fname, peaks, spectra = prep(0)
     sm.plot_spectra(spectra)
 
     ela.plot_exline(1, 1)
-    ela.plot_exline(1, 2, offset=1)
+    ela.plot_exline(1, 2)
     ela.plot_exline(1, 3)
     ela.plot_exline(1, 4)
-    ela.plot_exline(1, 5)
     ela.plot_emline(1, 1)
     ela.plot_emline(2, 1)
     ela.plot_emline(3, 1)
     ela.plot_emline(4, 1)
-    ela.plot_emline(5, 1, fmt=":")
+    ela.plot_emline(5, 1)
 
     sm.plot_peaks(peaks)
     plt.savefig(fname, dpi=400)
@@ -58,16 +55,20 @@ if False:
     sm.plot_spectra(spectra)
 
     ela.plot_exline(1, 1)
-    ela.plot_exline(1, 2, offset=1)
+    ela.plot_exline(1, 2)
     ela.plot_exline(1, 3)
-    ela.plot_exline(1, 4)
     ela.plot_emline(1, 1)
     ela.plot_emline(2, 1)
     ela.plot_emline(3, 1)
     ela.plot_emline(4, 1)
-    ela.plot_emline(5, 1, fmt=":")
-    ela.plot_emline(1, 2, color=1, offset=1)
-    ela.plot_emline(1, 3, color=1)
+    ela.plot_emline(5, 1)
+
+    ela.plot_emline(4, 2, color=1)
+    ela.plot_emline(4, 3, color=1)
+    ela.plot_emline(2, 2, color=1)
+    ela.plot_emline(2, 3, color=1)
+    ela.plot_emline(3, 2, color=1)
+    ela.plot_emline(1, 2, color=1)
 
     sm.plot_peaks(peaks)
     plt.savefig(fname, dpi=400)
@@ -80,19 +81,22 @@ if False:
     sm.plot_spectra(spectra)
 
     ela.plot_exline(1, 1)
-    ela.plot_exline(1, 2, offset=1)
+    ela.plot_exline(1, 2)
     ela.plot_exline(1, 3)
-    ela.plot_exline(1, 4)
     ela.plot_emline(1, 1)
     ela.plot_emline(2, 1)
     ela.plot_emline(3, 1)
     ela.plot_emline(4, 1)
-    ela.plot_emline(5, 1, fmt=":")
-    ela.plot_emline(1, 2, color=1, offset=1)
+    ela.plot_emline(5, 1)
+
+    ela.plot_emline(4, 2, color=1)
+    ela.plot_emline(4, 3, color=1)
+    ela.plot_emline(2, 2, color=1)
+    ela.plot_emline(2, 3, color=1)
+    ela.plot_emline(3, 2, color=1)
+    ela.plot_emline(1, 2, color=1)
     ela.plot_emline(1, 3, color=1)
-    ela.plot_emline(2, 4, color=1, offset=1)
-    ela.plot_emline(3, 3, color=1)
-    ela.plot_emline(5, 3, color=1, fmt=":")
+    ela.plot_emline(2, 4, color=1)
 
     sm.plot_peaks(peaks)
     plt.savefig(fname, dpi=400)
@@ -105,16 +109,24 @@ if False:
     sm.plot_spectra(spectra)
 
     ela.plot_exline(1, 1)
-    ela.plot_exline(1, 2, offset=1)
+    ela.plot_exline(1, 2)
     ela.plot_exline(1, 3)
-    ela.plot_exline(1, 4)
     ela.plot_emline(1, 1)
     ela.plot_emline(2, 1)
     ela.plot_emline(3, 1)
     ela.plot_emline(4, 1)
-    ela.plot_emline(5, 1, fmt=":")
+    ela.plot_emline(5, 1)
+
+    ela.plot_emline(4, 2, color=1)
+    ela.plot_emline(4, 3, color=1)
+    ela.plot_emline(2, 2, color=1)
+    ela.plot_emline(2, 3, color=1)
+    ela.plot_emline(3, 2, color=1)
+    ela.plot_emline(1, 2, color=1)
     ela.plot_emline(1, 3, color=1)
+    ela.plot_emline(2, 4, color=1)
     ela.plot_emline(3, 3, color=1)
+    ela.plot_emline(5, 4, color=1)
 
     sm.plot_peaks(peaks)
     plt.savefig(fname, dpi=400)
@@ -123,13 +135,12 @@ if False:
 
 # temperature dependence
 if False:
-    folders = ("Data/JinD 2", "Data/JinD 1", "Data/JinD 0")
-    temps = (60, 32, 13)
+    folders = ("Data/JinD 3", "Data/JinD 2", "Data/JinD 1", "Data/JinD 0")
+    temps = (104, 60, 32, 13)
     spectra = [sm.read_all_2dspectra(f) for f in folders]
 
     ela.plot_temperature_dependence(spectra, temps)
-
-    plt.xlim((6275, 6600))
+    plt.xlim((6300, 6600))
 
     ela.add_empeak(1, 1)
     ela.add_empeak(2, 1)
@@ -137,11 +148,16 @@ if False:
     ela.add_empeak(4, 1)
     ela.add_empeak(5, 1)
 
-    ela.add_empeak(2, 4)
-    ela.add_empeak(1, 3)
-    ela.add_empeak(3, 3)
+    ela.add_empeak(4, 2)
+    ela.add_empeak(4, 3)
+    ela.add_empeak(2, 2)
+    ela.add_empeak(2, 3)
+    ela.add_empeak(3, 2)
     ela.add_empeak(1, 2)
-    ela.add_empeak(5, 3)
+    ela.add_empeak(1, 3)
+    ela.add_empeak(2, 4)
+    ela.add_empeak(3, 3)
+    ela.add_empeak(5, 4)
 
-    plt.savefig(tempfilename, dpi=400)
+    plt.savefig("Figures/JinD_site2_temp.png", dpi=400)
     plt.show()

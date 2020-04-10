@@ -78,12 +78,8 @@ class EnergyLevelsAssignments:
         else:
             print(type(data))
             if (ex < min(data.ex)) or (ex > max(data.ex)):
-                # print("out of bounds")
                 return None
             else:
-                print("in bounds")
-                print(min(data.ex))
-                print(max(data.ex))
                 ind = sum(data.ex >= ex)
                 d = data.spec[:, ind + 1]
                 d = d - min(d)
