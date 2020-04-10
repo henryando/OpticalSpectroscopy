@@ -63,17 +63,21 @@ def plot_lines(lines, fmt="g", ax=None):
     ax.plot(xlim, [emlines, emlines], fmt, linewidth=0.5)
 
 
-def plot_peaks(peaks, color="r", size=10, ax=None):
+def plot_peaks(peaks, color="r", size=2, ax=None):
     """Takes a peak dictionary. Plots the peaks with small red dots."""
     if type(peaks) is st.Peaks:
         (x, y) = (peaks.ex, peaks.em)
     else:
         (x, y) = (peaks[0], peaks[1])
-
-    if ax is None:
-        ax = plt.gca()
-
-    ax.scatter(x, y, s=size, c=color)
+    plt.plot(
+        x,
+        y,
+        "o",
+        markersize=size,
+        markeredgecolor="w",
+        markeredgewidth=0.5,
+        markerfacecolor="k",
+    )
 
 
 # def _em_at_given_ex(data, ex):

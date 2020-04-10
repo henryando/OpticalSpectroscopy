@@ -1,5 +1,4 @@
 import numpy as np
-import conversions as conv
 
 
 class Spectrum:
@@ -72,8 +71,8 @@ def find_potential_peaks(data, linewidth=0.2, noisefraction=(1 / 8)):
     excitation = data.ex
     spectrum = np.log(spectrum)
     peakmatrix = find_local_maxes_2d(spectrum)
-    emrad = conv.linewidth_to_nsamples(emission, linewidth)
-    exrad = conv.linewidth_to_nsamples(excitation, linewidth)
+    emrad = linewidth_to_nsamples(emission, linewidth)
+    exrad = linewidth_to_nsamples(excitation, linewidth)
     noise = np.std(spectrum)
     peakmatrix = filter_peaks_square_perimeter(
         spectrum, peakmatrix, exrad, emrad, height=(noise * noisefraction)
@@ -102,6 +101,15 @@ def find_local_maxes_2d(data):
     peaks = np.zeros_like(data, dtype=bool)
     peaks[1:-1, 1:-1] = np.bitwise_and(xpeaks[:, 1:-1], ypeaks[1:-1, :])
     return peaks
+
+
+def linewidth_to_nsamples(wavelengths, linewidth):
+    """Given an array of wavelengths like emission or excitation, return the
+    number of samples that corresponds to the appropriate linewidth.
+    """
+    return int(
+        np.ceil(linewidth * wavelengths.size / (max(wavelengths) - min(wavelengths)))
+    )
 
 
 def filter_peaks_square_perimeter(data, peaks, xrad, yrad, height=0):

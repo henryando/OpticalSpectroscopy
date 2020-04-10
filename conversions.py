@@ -10,10 +10,6 @@ def nm_to_wavenumber(data):
         return 1e7 / data
 
 
-def linewidth_to_nsamples(wavelengths, linewidth):
-    """Given an array of wavelengths like emission or excitation, return the
-    number of samples that corresponds to the appropriate linewidth.
-    """
-    return int(
-        np.ceil(linewidth * wavelengths.size / (wavelengths[-1] - wavelengths[0]))
-    )
+def kelvin_to_wavenumber(temp):
+    """Convert kelvin to wavenumbers."""
+    return temp * 0.695028

@@ -77,8 +77,8 @@ def plot2d(data, clevels=None, figsize=(7, 7), inputfigure=None, xpixels=2000):
         labelleft=True,
         labelright=False,
     )
-    ax.set_xlabel(r"Excitation Wavelength / cm^{-1}")
-    ax.set_ylabel(r"Emission Wavelength / cm^{-1}")
+    ax.set_xlabel(r"Excitation Wavelength / cm$^{-1}$")
+    ax.set_ylabel(r"Emission Wavelength / cm$^{-1}$")
     ax.set_facecolor(cm.jet(0))
     return fig, ax
 

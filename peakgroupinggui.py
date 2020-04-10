@@ -139,7 +139,10 @@ class PeakGrouper:
                 self.peaks.ex > self.exbins[goodcols[i]],
                 self.peaks.ex < self.exbins[goodcols[i] + 1],
             )
-            wavelengths[i] = np.mean(self.peaks.ex[peakinds])
+            if sum(peakinds > 0):
+                wavelengths[i] = np.mean(self.peaks.ex[peakinds])
+            else:
+                wavelengths[i] = np.nan
             goodpeaks.ex = np.concatenate(
                 (goodpeaks.ex, self.peaks.ex[peakinds]), axis=0
             )
@@ -155,7 +158,6 @@ class PeakGrouper:
         Also returns the central wavelengths of the peaks in each bin.
         """
         goodrows = np.nonzero(self.rows * (self.rows - 1))[0]
-        print(goodrows)
         N = len(goodrows)
         wavelengths = np.zeros(N)
         goodpeaks = st.Peaks()
@@ -164,7 +166,10 @@ class PeakGrouper:
                 self.peaks.em > self.embins[goodrows[i]],
                 self.peaks.em < self.embins[goodrows[i] + 1],
             )
-            wavelengths[i] = np.mean(self.peaks.em[peakinds])
+            if sum(peakinds > 0):
+                wavelengths[i] = np.mean(self.peaks.em[peakinds])
+            else:
+                wavelengths[i] = np.nan
             goodpeaks.ex = np.concatenate(
                 (goodpeaks.ex, self.peaks.ex[peakinds]), axis=0
             )
@@ -251,9 +256,34 @@ class PeakGrouper:
         return row - 1
 
 
+def snap_exline(data, ex):
+    """Snaps an ex line to the exact value of the local excitation max."""
+    if type(data) is list:
+        for d in data:
+            snapped = snap_exline(d, ex)
+            if snapped is not None:
+                return snapped
+    else:
+        if (min(data.ex) <= ex) and (ex <= max(data.ex)):
+            return data.ex[(sum(data.ex > ex) + 1)]
+
+
+def snap_emline(data, em):
+    """Snaps an em line to the exact value of the nearest emission point."""
+    if type(data) is list:
+        for d in data:
+            snapped = snap_emline(d, em)
+            if snapped is not None:
+                return snapped
+    else:
+        return data.em[(sum(data.em > em) + 1)]
+
+
 ####################################################################################
 # The main function for this module.
 ####################################################################################
+
+
 def find_lines(spectra, peaks, grouping_Wx=0.5, grouping_Wy=1):
     if type(peaks) is not st.Peaks:
         peaks = st.Peaks(peaks[0], peaks[1])
@@ -279,5 +309,8 @@ def find_lines(spectra, peaks, grouping_Wx=0.5, grouping_Wy=1):
 
     exlines = exlines[np.bitwise_not(np.isnan(exlines))]
     emlines = emlines[np.bitwise_not(np.isnan(emlines))]
+
+    # exlines = [snap_exline(spectra, l) for l in exlines]
+    # emlines = [snap_emline(spectra, l) for l in emlines]
 
     return exlines, emlines

@@ -80,6 +80,8 @@ def read_2dspectrum(relative_filepath):
         spec = (rawdata["Spectrum2D"] - const.READOUT_NOISE_COUNTS) / time
         spec = spec[:, ex > 0]
         ex = conv.nm_to_wavenumber(ex[ex > 0])
+        # print(temp)
+        # print(relative_filepath)
         return Spectrum(
             ex,
             conv.nm_to_wavenumber(const.CALIBRATED_EMISSION),
