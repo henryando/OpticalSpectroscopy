@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import spectroscopymain as sm
 import lineanalysis as la
+import fieldfitting as ff
 
 ela = la.load_object("Data/JinD/site0.pkl")
 fileformat = "Figures/JinD_site0_%dK.png"
@@ -24,11 +25,16 @@ def prep(i):
 
 
 # print level structure
-if True:
+if False:
     print("Z levels:")
     [print(l) for l in ela.zlevels]
     print("Y levels:")
     [print(l + ela.z1y1) for l in ela.ylevels]
+
+
+if True:
+    ff.field_fit(ela.zlevels[:-1], 15 / 2)
+    ff.field_fit(ela.ylevels, 13 / 2)
 
 
 # 13K

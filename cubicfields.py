@@ -83,4 +83,10 @@ def energies(j, W, x, f4=60, f6=13860):
     by the total angular momentum j, the scale parameter W, and the mixing
     parameter x.
     """
+    if j == 13 / 2:
+        f4 = 60
+        f6 = 7560
+    if j == 15 / 2:
+        f4 = 60
+        f6 = 13860
     return W * np.linalg.eigvalsh(x * get_o_4(j) / f4 + (1 - abs(x)) * get_o_6(j) / f6)
