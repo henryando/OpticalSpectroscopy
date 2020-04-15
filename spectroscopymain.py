@@ -38,12 +38,14 @@ def find_peaks(spectra, linewidth=0.07, noisefraction=1 / 10):
     return (peaks.ex, peaks.em)
 
 
-def find_lines(spectra, peaks, Wx=0.3, Wy=1.5):
+def find_lines(spectra, peaks, Wx=0.3, Wy=1.5, oldlines=None):
     """Takes a list of spectra objects and peak objects. Group the peaks
     into lines by hand using a GUI. The rows and columns of the GUI are set by the
     linewidths Wx and Wy. Returns the lines in excitation and emission.
     """
-    return pgg.find_lines(spectra, peaks, grouping_Wx=Wx, grouping_Wy=Wy)
+    return pgg.find_lines(
+        spectra, peaks, grouping_Wx=Wx, grouping_Wy=Wy, oldlines=oldlines
+    )
 
 
 def plot_spectra(spectra, clevels=None, figsize=(7, 7), figure=None):

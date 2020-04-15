@@ -284,12 +284,17 @@ def snap_emline(data, em):
 ####################################################################################
 
 
-def find_lines(spectra, peaks, grouping_Wx=0.5, grouping_Wy=1):
+def find_lines(spectra, peaks, grouping_Wx=0.5, grouping_Wy=1, oldlines=None):
     if type(peaks) is not st.Peaks:
         peaks = st.Peaks(peaks[0], peaks[1])
 
     fig, ax = pfg.plot2d(spectra)
     pfg.plot_peaks(peaks.ex, peaks.em)
+    if oldlines is not None:
+        xlim = plt.xlim()
+        ylim = plt.ylim()
+        ax.plot([oldlines[0], oldlines[0]], ylim, "m", linewidth=0.5)
+        ax.plot(xlim, [oldlines[1], oldlines[1]], "m", linewidth=0.5)
     pg = PeakGrouper(spectra, peaks, grouping_Wx, grouping_Wy)
     pg.show_omatrix()
     try:
@@ -300,6 +305,11 @@ def find_lines(spectra, peaks, grouping_Wx=0.5, grouping_Wy=1):
     peaks = pg.peaks
     fig, ax = pfg.plot2d(spectra)
     pfg.plot_peaks(peaks.ex, peaks.em)
+    if oldlines is not None:
+        xlim = plt.xlim()
+        ylim = plt.ylim()
+        ax.plot([oldlines[0], oldlines[0]], ylim, "m", linewidth=0.5)
+        ax.plot(xlim, [oldlines[1], oldlines[1]], "m", linewidth=0.5)
     pg = PeakGrouper(spectra, peaks, grouping_Wx, grouping_Wy)
     pg.show_omatrix()
     try:
