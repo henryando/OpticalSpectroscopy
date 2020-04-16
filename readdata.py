@@ -73,6 +73,7 @@ def read_2dspectrum(relative_filepath):
     'time' (the acquisition time in seconds).
     """
     rawdata = loadmat(relative_filepath)
+
     temp, time, _ = read_metadata(relative_filepath)
     try:
         ex = rawdata["ActualWavelength"][0]
@@ -82,6 +83,8 @@ def read_2dspectrum(relative_filepath):
         ex = conv.nm_to_wavenumber(ex[ex > 0])
         # print(temp)
         # print(relative_filepath)
+        if len(ex) == 0:
+            raise ScanTypeError(relative_filepath)
         return Spectrum(
             ex,
             conv.nm_to_wavenumber(const.CALIBRATED_EMISSION),

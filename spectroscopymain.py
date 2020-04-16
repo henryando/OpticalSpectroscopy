@@ -4,6 +4,7 @@ import readdata as rd
 import peakfindinggui as pfg
 import peakgroupinggui as pgg
 import matplotlib.pyplot as plt
+import sys
 
 
 def read_all_2dspectra(folder):
@@ -14,9 +15,13 @@ def read_all_2dspectra(folder):
     time for spectrometer.
     """
     spectra = rd.read_all_2dspectra(folder)
-    print("There are %d spectra in this folder." % len(spectra))
-    print("The temperature is %.1f." % spectra[0].temp)
-    return spectra
+    if len(spectra) == 0:
+        print("There are no spectra in this folder.")
+        sys.exit()
+    else:
+        print("There are %d spectra in this folder." % len(spectra))
+        print("The temperature is %.1f." % spectra[0].temp)
+        return spectra
 
 
 def iterative_smooth(spectra, N=2, Wx=2, Wy=2):
