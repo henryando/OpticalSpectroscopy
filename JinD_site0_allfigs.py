@@ -3,10 +3,13 @@ import matplotlib.pyplot as plt
 import spectroscopymain as sm
 import lineanalysis as la
 import fieldfitting as ff
+import conversions as conv
+from scipy.optimize import curve_fit
 
 ela = la.load_object("Data/JinD/site0.pkl")
 fileformat = "Figures/JinD_site0_%dK.png"
 tempfilename = "Figures/JinD_site0_temp.png"
+linewidthfilename = "Figures/JinD_site0_lineshape.png"
 
 folders = ("Data/JinD 0", "Data/JinD 1", "Data/JinD 2", "Data/JinD 3")
 temps = (13, 32, 60, 106)
@@ -26,16 +29,23 @@ def prep(i):
 
 # print level structure
 if False:
+    print("Z1Y1:")
+    print("%.1f" % ela.z1y1)
     print("Z levels:")
-    [print(l) for l in ela.zlevels]
+    [print("%.1f" % l) for l in ela.zlevels]
     print("Y levels:")
-    [print(l + ela.z1y1) for l in ela.ylevels]
+    [print("%.1f" % l) for l in ela.ylevels]
 
 
-if True:
-    ff.field_fit(ela.zlevels[:-1], 15 / 2)
-    ff.field_fit(ela.ylevels, 13 / 2)
-
+if False:
+    w, x, _ = ff.field_fit(ela.zlevels[:-1], 15 / 2, wsign=-1)
+    zlevels = ff.get_levels(w, x, 15 / 2)
+    w, x = conv.wx15_towx13(w, x)
+    ylevels = ff.get_levels(w, x, 13 / 2)
+    print("Theoretical Z levels:")
+    [print("%.1f" % l) for l in zlevels]
+    print("Theoretical Y levels:")
+    [print("%.1f" % l) for l in ylevels]
 
 # 13K
 if False:
@@ -150,4 +160,49 @@ if False:
     ela.add_empeak(5, 3)
 
     plt.savefig(tempfilename, dpi=400)
+    plt.show()
+
+
+def gauss(x, a, b, w, x0):
+    return a * np.exp(-((x - x0) ** 2) / (2 * w ** 2)) + b
+
+
+def lorentz(x, a, b, w, x0):
+    return a / (1 + ((x - x0) ** 2 / w)) + b
+
+
+if True:
+    folders = ("Data/JinD 2", "Data/JinD 1", "Data/JinD 0")
+    temps = (60, 32, 13)
+    spectra = [sm.read_all_2dspectra(f) for f in folders]
+    w = 4
+    d = 25
+    for s in spectra:
+        for r in s:
+            if (min(r.ex) < ela.z1y1) and (max(r.ex) > ela.z1y1):
+                goodinds = np.bitwise_and(r.ex > ela.z1y1 - w, r.ex < ela.z1y1 + w)
+                spec = r.spec[:, goodinds]
+                ex = r.ex[goodinds]
+                emind = int(sum(r.em < ela.y1z1))
+                spec = np.sum(spec[emind - d : emind + d], axis=0)
+                ex = ex - np.mean(ex)
+                spec = spec - min(spec)
+                p0 = (max(spec), 0, 1, 0)
+                popt1, pcov1 = curve_fit(gauss, ex, spec, p0=p0)
+                popt2, pcov2 = curve_fit(lorentz, ex, spec, p0=p0)
+
+                print("At temperature %.1f:" % r.temp)
+                print("Gaussian SSE: %.1f" % sum((gauss(ex, *popt1) - spec) ** 2))
+                print("Gaussian FWHM: %.2f" % (popt1[2] * 2.355))
+                print("Lorentzian SSE: %.1f" % sum((lorentz(ex, *popt2) - spec) ** 2))
+                print("Lorentzian FWHM: %.2f" % (2 * np.sqrt(popt2[2])))
+
+                plt.figure()
+                plt.plot(ex, spec)
+                plt.plot(ex, gauss(ex, *popt1))
+                plt.plot(ex, lorentz(ex, *popt2))
+                plt.legend(("Data", "Gaussian", "Lorentzian"))
+                plt.show()
+
+    plt.savefig(linewidthfilename, dpi=400)
     plt.show()

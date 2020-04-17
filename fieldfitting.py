@@ -6,8 +6,8 @@ import lineanalysis as la
 import cubicfields as cf
 
 
-def _processed_fieldmodel_levels(x, J, spacing, minimum, ignorelevels=0):
-    eigvals = np.unique(np.round(cf.energies(J, 1, x), decimals=8))
+def _processed_fieldmodel_levels(x, W, J, spacing, minimum, ignorelevels=0):
+    eigvals = np.unique(np.round(cf.energies(J, W, x), decimals=8))
     eigvals = eigvals * spacing / (eigvals[1 + ignorelevels] - eigvals[0])
     eigvals = eigvals - eigvals[0] + minimum
     return eigvals
@@ -20,16 +20,18 @@ def _energy_dist(obs, calc):
     return d
 
 
-def field_fit(levels, J, xmin=-1, xmax=1, ignorelevels=0):
+def field_fit(levels, J, wsign=1, ignorelevels=0):
     """Plots field fit, and returns best fit parameters W and x. Takes as inputs
     the energy levels as a list and the total angular momentum J.
     """
+    xmin = -1
+    xmax = 1
     xvals = np.linspace(xmin, xmax, num=1000)
     levels = np.sort(levels)
     spacing = levels[1] - levels[0]
     minimum = levels[0]
     energies = [
-        _processed_fieldmodel_levels(x, J, spacing, minimum, ignorelevels)
+        _processed_fieldmodel_levels(x, wsign, J, spacing, minimum, ignorelevels)
         for x in xvals
     ]
     length = round(np.mean([len(e) for e in energies]))
@@ -54,4 +56,14 @@ def field_fit(levels, J, xmin=-1, xmax=1, ignorelevels=0):
     )
     plt.plot((xvals[g], xvals[g]), plt.ylim(), "r:")
     plt.show()
-    return xvals[g]
+
+    x = xvals[g]
+    dmin = dists[g]
+    eigvals = np.unique(np.round(cf.energies(J, wsign, x), decimals=8))
+    w = wsign * spacing / (eigvals[1 + ignorelevels] - eigvals[0])
+    return w, x, dmin
+
+
+def get_levels(W, x, J):
+    eigvals = np.unique(np.round(cf.energies(J, W, x), decimals=8))
+    return eigvals - min(eigvals)

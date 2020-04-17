@@ -16,7 +16,7 @@ class EnergyLevelsAssignments:
         return self.z1y1 + self.ylevels[ylevel - 1] - self.zlevels[zlevel - 1]
 
     def line_energy_em(self, zlevel, ylevel):
-        return self.y1z1 + self.ylevels[ylevel - 1] - self.zlevels[zlevel - 1]
+        return self.z1y1 + self.ylevels[ylevel - 1] - self.zlevels[zlevel - 1]
 
     def plot_exline(self, zlevel, ylevel, color=0, fmt="-", offset=0):
         if color == 0:
