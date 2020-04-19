@@ -39,6 +39,12 @@ def plot2d(data, clevels=None, figsize=(7, 7), inputfigure=None, xpixels=2000):
     if type(data) is list:
         fig = plt.figure(figsize=figsize)
         ax = plt.subplot(111)
+        if clevels is None:
+            a = min([np.min(d.spec) for d in data])
+            b = max([np.max(d.spec) for d in data])
+            a = max((a, 100))
+            b = 0.8 * (b - a) + a
+            clevels = np.linspace(np.log(a), np.log(b), 100)
         for d in data:
             plot2d(
                 d, clevels=clevels, inputfigure=fig, xpixels=int(xpixels / len(data)),

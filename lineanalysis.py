@@ -3,6 +3,51 @@ import spectrumtools as st
 import conversions as conv
 import matplotlib.pyplot as plt
 import pickle
+import spectroscopymain as sm
+
+
+class EnergyLevelsPlot:
+    def __init__(self, ela, data):
+        self.ela = ela
+        self.data = data
+
+    def generate_figure(self, fmt):
+        if fmt == "small":
+            sm.plot_spectra(self.data, figsize=(3, 4.25))
+            plt.xlabel("")
+            plt.ylabel("")
+        elif fmt == "large":
+            sm.plot_spectra(self.data, figsize=(6, 8.5))
+        self.fmt = fmt
+
+    def plot_peaks(self, peaks, color="r"):
+        sm.plot_peaks(peaks, color=color)
+
+    def plot_exline(self, zlevel, ylevel, color=0, fmt="-", offset=0):
+        if self.fmt == "small":
+            self.ela.plot_exline(
+                zlevel, ylevel, color=color, fmt=fmt, offset=offset, fontsize=7
+            )
+        if self.fmt == "large":
+            self.ela.plot_exline(
+                zlevel, ylevel, color=color, fmt=fmt, offset=offset, fontsize=9
+            )
+
+    def plot_emline(self, zlevel, ylevel, color=0, fmt="-", offset=0):
+        if self.fmt == "small":
+            self.ela.plot_emline(
+                zlevel, ylevel, color=color, fmt=fmt, offset=offset, fontsize=7
+            )
+        if self.fmt == "large":
+            self.ela.plot_emline(
+                zlevel, ylevel, color=color, fmt=fmt, offset=offset, fontsize=9
+            )
+
+    def savefig(self, fname, resolution):
+        if resolution == "highres":
+            plt.savefig(fname, dpi=800, bbox_inches="tight")
+        else:
+            plt.savefig(fname, dpi=300, bbox_inches="tight")
 
 
 class EnergyLevelsAssignments:
@@ -18,7 +63,7 @@ class EnergyLevelsAssignments:
     def line_energy_em(self, zlevel, ylevel):
         return self.z1y1 + self.ylevels[ylevel - 1] - self.zlevels[zlevel - 1]
 
-    def plot_exline(self, zlevel, ylevel, color=0, fmt="-", offset=0):
+    def plot_exline(self, zlevel, ylevel, color=0, fmt="-", offset=0, fontsize=9):
         if color == 0:
             color = "g"
         elif color == 1:
@@ -26,7 +71,6 @@ class EnergyLevelsAssignments:
         ylim = plt.ylim()
         # xlim = plt.xlim()
         sf = 30
-        fontsize = 9
         plt.plot(
             [self.line_energy_ex(zlevel, ylevel), self.line_energy_ex(zlevel, ylevel)],
             ylim,
@@ -42,7 +86,7 @@ class EnergyLevelsAssignments:
             color=color,
         )
 
-    def plot_emline(self, zlevel, ylevel, color=0, fmt="-", offset=0):
+    def plot_emline(self, zlevel, ylevel, color=0, fmt="-", offset=0, fontsize=9):
         if color == 0:
             color = "g"
         elif color == 1:
@@ -50,7 +94,6 @@ class EnergyLevelsAssignments:
             # ylim = plt.ylim()
         xlim = plt.xlim()
         sf = 30
-        fontsize = 9
         plt.plot(
             xlim,
             [self.line_energy_em(zlevel, ylevel), self.line_energy_em(zlevel, ylevel)],
@@ -59,7 +102,7 @@ class EnergyLevelsAssignments:
             linewidth=1,
         )
         plt.text(
-            xlim[1] + (0.2 + 1.5 * offset) * (xlim[1] - xlim[0]) / sf,
+            xlim[1] + (0.2 + 3 * offset) * (xlim[1] - xlim[0]) / sf,
             self.line_energy_em(zlevel, ylevel),
             "Y$_{%d}$Z$_{%d}$" % (ylevel, zlevel),
             fontsize=fontsize,
@@ -76,7 +119,6 @@ class EnergyLevelsAssignments:
                     # print("returning em")
                     return emspec
         else:
-            print(type(data))
             if (ex < min(data.ex)) or (ex > max(data.ex)):
                 return None
             else:
@@ -89,7 +131,7 @@ class EnergyLevelsAssignments:
     def plot_temperature_dependence(self, spectra, temps):
         emission = [self.get_emission_spec(s) for s in spectra]
         emaxis = spectra[0][0].em
-        plt.figure(figsize=(8, 3))
+        plt.figure(figsize=(6.5, 2.5))
         [plt.plot(emaxis, em, linewidth=1) for em in emission]
         plt.xlabel("Emission energy / cm$^{-1}$")
         plt.ylabel("Normalized emission / a.u.")

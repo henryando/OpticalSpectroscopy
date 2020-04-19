@@ -28,7 +28,7 @@ def prep(i):
 
 
 # print level structure
-if False:
+if True:
     print("Z1Y1:")
     print("%.1f" % ela.z1y1)
     print("Z levels:")
@@ -50,7 +50,7 @@ if False:
 # 13K
 if False:
     fname, peaks, spectra = prep(0)
-    sm.plot_spectra(spectra)
+    sm.plot_spectra(spectra, figsize=(5, 5))
 
     ela.plot_exline(1, 1)
     ela.plot_exline(1, 2, offset=1)
@@ -64,14 +64,15 @@ if False:
     ela.plot_emline(5, 1, fmt=":")
 
     sm.plot_peaks(peaks)
-    plt.savefig(fname, dpi=400)
+
+    plt.savefig(fname, dpi=800, bbox_inches="tight")
     plt.show()
 
 
 # 30K
 if False:
     fname, peaks, spectra = prep(1)
-    sm.plot_spectra(spectra)
+    sm.plot_spectra(spectra, figsize=(5, 5))
 
     ela.plot_exline(1, 1)
     ela.plot_exline(1, 2, offset=1)
@@ -86,14 +87,14 @@ if False:
     ela.plot_emline(1, 3, color=1)
 
     sm.plot_peaks(peaks)
-    plt.savefig(fname, dpi=400)
+    plt.savefig(fname, dpi=800, bbox_inches="tight")
     plt.show()
 
 
 # 60K
 if False:
     fname, peaks, spectra = prep(2)
-    sm.plot_spectra(spectra)
+    sm.plot_spectra(spectra, figsize=(5, 5))
 
     ela.plot_exline(1, 1)
     ela.plot_exline(1, 2, offset=1)
@@ -111,14 +112,14 @@ if False:
     ela.plot_emline(5, 3, color=1, fmt=":")
 
     sm.plot_peaks(peaks)
-    plt.savefig(fname, dpi=400)
+    plt.savefig(fname, dpi=800, bbox_inches="tight")
     plt.show()
 
 
 # 100K
 if False:
     fname, peaks, spectra = prep(3)
-    sm.plot_spectra(spectra)
+    sm.plot_spectra(spectra, figsize=(5, 5))
 
     ela.plot_exline(1, 1)
     ela.plot_exline(1, 2, offset=1)
@@ -133,7 +134,7 @@ if False:
     ela.plot_emline(3, 3, color=1)
 
     sm.plot_peaks(peaks)
-    plt.savefig(fname, dpi=400)
+    plt.savefig(fname, dpi=800, bbox_inches="tight")
     plt.show()
 
 
@@ -159,7 +160,7 @@ if False:
     ela.add_empeak(1, 2)
     ela.add_empeak(5, 3)
 
-    plt.savefig(tempfilename, dpi=400)
+    plt.savefig(tempfilename, dpi=800)
     plt.show()
 
 
@@ -171,7 +172,7 @@ def lorentz(x, a, b, w, x0):
     return a / (1 + ((x - x0) ** 2 / w)) + b
 
 
-if True:
+if False:
     folders = ("Data/JinD 2", "Data/JinD 1", "Data/JinD 0")
     temps = (60, 32, 13)
     spectra = [sm.read_all_2dspectra(f) for f in folders]
