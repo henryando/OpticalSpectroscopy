@@ -13,7 +13,7 @@ def _processed_fieldmodel_levels(x, W, J, spacing, minimum, ignorelevels=0):
     return eigvals
 
 
-def _energy_dist(obs, calc):
+def energy_dist(obs, calc):
     d = 0
     for o in obs:
         d += min((o - calc) ** 2)
@@ -26,7 +26,7 @@ def field_fit(levels, J, wsign=1, ignorelevels=0):
     """
     xmin = -1
     xmax = 1
-    xvals = np.linspace(xmin, xmax, num=1000)
+    xvals = np.linspace(xmin, xmax, num=2000)
     levels = np.sort(levels)
     spacing = levels[1] - levels[0]
     minimum = levels[0]
@@ -41,7 +41,7 @@ def field_fit(levels, J, wsign=1, ignorelevels=0):
     xvals = xvals[good]
     energies = [e for e in energies if len(e) == length]
     energies = np.asarray(energies)
-    dists = [_energy_dist(levels, e) for e in energies]
+    dists = [energy_dist(levels, e) for e in energies]
 
     g = np.argmin(np.asarray(dists))
     plt.figure()

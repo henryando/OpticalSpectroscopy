@@ -30,6 +30,14 @@ def wx15_towx13(w, x):
     return w, x
 
 
+def wx15_tobs(w, x):
+    f4 = 60
+    f6 = 13860
+    b4 = w * x / f4
+    b6 = w * (1 - abs(x)) / f6
+    return b4, b6
+
+
 def wx13_towx15(w, x):
     f4 = 60
     f6 = 7560
@@ -43,3 +51,11 @@ def wx13_towx15(w, x):
     w = b4 * f4 / x
 
     return w, x
+
+
+def wx13_tobs(w, x):
+    f4 = 60
+    f6 = 7560
+    b4 = w * x / f4
+    b6 = w * (1 - abs(x)) / f6
+    return b4, b6

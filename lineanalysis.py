@@ -33,14 +33,30 @@ class EnergyLevelsPlot:
                 zlevel, ylevel, color=color, fmt=fmt, offset=offset, fontsize=9
             )
 
-    def plot_emline(self, zlevel, ylevel, color=0, fmt="-", offset=0):
+    def plot_emline(
+        self, zlevel, ylevel, color=0, fmt="-", offset=0, name=None, coord=None
+    ):
         if self.fmt == "small":
             self.ela.plot_emline(
-                zlevel, ylevel, color=color, fmt=fmt, offset=offset, fontsize=7
+                zlevel,
+                ylevel,
+                color=color,
+                fmt=fmt,
+                offset=offset,
+                fontsize=7,
+                name=name,
+                coord=coord,
             )
         if self.fmt == "large":
             self.ela.plot_emline(
-                zlevel, ylevel, color=color, fmt=fmt, offset=offset, fontsize=9
+                zlevel,
+                ylevel,
+                color=color,
+                fmt=fmt,
+                offset=offset,
+                fontsize=9,
+                name=name,
+                coord=coord,
             )
 
     def savefig(self, fname, resolution):
@@ -63,7 +79,21 @@ class EnergyLevelsAssignments:
     def line_energy_em(self, zlevel, ylevel):
         return self.z1y1 + self.ylevels[ylevel - 1] - self.zlevels[zlevel - 1]
 
-    def plot_exline(self, zlevel, ylevel, color=0, fmt="-", offset=0, fontsize=9):
+    def plot_exline(
+        self,
+        zlevel,
+        ylevel,
+        color=0,
+        fmt="-",
+        offset=0,
+        fontsize=9,
+        name=None,
+        coord=None,
+    ):
+        if name is None:
+            name = "Z$_{%d}$Y$_{%d}$" % (ylevel, zlevel)
+        if coord is None:
+            coord = self.line_energy_ex(zlevel, ylevel)
         if color == 0:
             color = "g"
         elif color == 1:
@@ -72,21 +102,31 @@ class EnergyLevelsAssignments:
         # xlim = plt.xlim()
         sf = 30
         plt.plot(
-            [self.line_energy_ex(zlevel, ylevel), self.line_energy_ex(zlevel, ylevel)],
-            ylim,
-            fmt,
-            color=color,
-            linewidth=1,
+            [coord, coord], ylim, fmt, color=color, linewidth=1,
         )
         plt.text(
-            self.line_energy_ex(zlevel, ylevel),
+            coord,
             ylim[1] + (0.4 + 1 * offset) * (ylim[1] - ylim[0]) / sf,
-            "Z$_{%d}$Y$_{%d}$" % (zlevel, ylevel),
+            name,
             fontsize=fontsize,
             color=color,
         )
 
-    def plot_emline(self, zlevel, ylevel, color=0, fmt="-", offset=0, fontsize=9):
+    def plot_emline(
+        self,
+        zlevel,
+        ylevel,
+        color=0,
+        fmt="-",
+        offset=0,
+        fontsize=9,
+        name=None,
+        coord=None,
+    ):
+        if name is None:
+            name = "Y$_{%d}$Z$_{%d}$" % (ylevel, zlevel)
+        if coord is None:
+            coord = self.line_energy_em(zlevel, ylevel)
         if color == 0:
             color = "g"
         elif color == 1:
@@ -95,16 +135,12 @@ class EnergyLevelsAssignments:
         xlim = plt.xlim()
         sf = 30
         plt.plot(
-            xlim,
-            [self.line_energy_em(zlevel, ylevel), self.line_energy_em(zlevel, ylevel)],
-            fmt,
-            color=color,
-            linewidth=1,
+            xlim, [coord, coord], fmt, color=color, linewidth=1,
         )
         plt.text(
             xlim[1] + (0.2 + 3 * offset) * (xlim[1] - xlim[0]) / sf,
-            self.line_energy_em(zlevel, ylevel),
-            "Y$_{%d}$Z$_{%d}$" % (ylevel, zlevel),
+            coord,
+            name,
             fontsize=fontsize,
             color=color,
         )

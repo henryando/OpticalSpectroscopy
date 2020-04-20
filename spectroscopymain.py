@@ -24,6 +24,23 @@ def read_all_2dspectra(folder):
         return spectra
 
 
+def read_all_excitation(folder):
+    """Return a list of Spectrum objects for all the 2d spectra in a given folder.
+    Also print the number of spectra and the mean temperature of the spectra.
+    Each object has fields: 'em': emission wavelengths, 'ex': excitation
+    wavelengths, 'spec': spectrum2d data, 'temp': temperature, 'time': acquisition
+    time for spectrometer.
+    """
+    spectra = rd.read_all_excitation(folder)
+    if len(spectra) == 0:
+        print("There are no excitation spectra in this folder.")
+        sys.exit()
+    else:
+        print("There are %d excitation spectra in this folder." % len(spectra))
+        print("The temperature is %.1f." % spectra[0].temp)
+        return spectra
+
+
 def iterative_smooth(spectra, N=2, Wx=2, Wy=2):
     """Takes a list of spectrum objects (or a single object). Smoothes
     the data with a simple moving window average. Smoothing alternates x and y,

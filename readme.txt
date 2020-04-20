@@ -6,4 +6,4 @@ Peak finding is done through a combination of automatic detection and GUI-based 
 
 
 
-There are two basic formats in which I'd like to be able to plot 2D spectra. One is large format: axis labels, widths appropriate for the whole page. The other is small format: no axis labels, 1/2 size in both dimensions. 
+There are two basic formats in which I'd like to be able to plot 2D spectra. One is large format: axis labels, widths appropriate for the whole page. The other is small format: no axis labels, 1/2 size in both dimensions.

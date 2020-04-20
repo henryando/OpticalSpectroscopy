@@ -63,6 +63,18 @@ def read_excitation(relative_filepath):
         raise ScanTypeError(relative_filepath)
 
 
+def read_all_excitation(folder):
+    """Returns a list of data dictionaries for all the 2d spectra in a folder."""
+    fnames = get_filepaths(folder)
+    spectra = []
+    for f in fnames:
+        try:
+            spectra.append(read_excitation(f))
+        except ScanTypeError:
+            pass
+    return spectra
+
+
 def read_2dspectrum(relative_filepath):
     """Returns a dictionary with:
 

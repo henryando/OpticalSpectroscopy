@@ -65,6 +65,37 @@ else:
         print("Y levels:")
         [print("%.1f" % l) for l in ela.ylevels]
 
+    if figtype == "fitlevels":
+        if not site == 3:
+            w, x, d = ff.field_fit(ela.zlevels, 15 / 2, wsign=1)
+            print("B4: %.2e, B6: %.2e, dist: %.3f" % (*conv.wx15_tobs(w, x), d))
+            if d < 1:
+                print("looks good...trying other side...")
+                w, x = conv.wx15_towx13(w, x)
+                levels = ff.get_levels(w, x, 13 / 2)
+                print("dist: %.3f" % ff.energy_dist(ela.ylevels, levels))
+            w, x, d = ff.field_fit(ela.zlevels, 15 / 2, wsign=-1)
+            print("B4: %.2e, B6: %.2e, dist: %.3f" % (*conv.wx15_tobs(w, x), d))
+            if d < 1:
+                print("looks good...trying other side...")
+                w, x = conv.wx15_towx13(w, x)
+                levels = ff.get_levels(w, x, 13 / 2)
+                print("dist: %.3f" % ff.energy_dist(ela.ylevels, levels))
+        w, x, d = ff.field_fit(ela.ylevels, 13 / 2, wsign=1)
+        print("B4: %.2e, B6: %.2e, dist: %.3f" % (*conv.wx13_tobs(w, x), d))
+        if d < 1:
+            print("looks good...trying other side...")
+            w, x = conv.wx13_towx15(w, x)
+            levels = ff.get_levels(w, x, 15 / 2)
+            print("dist: %.3f" % ff.energy_dist(ela.zlevels, levels))
+        w, x, d = ff.field_fit(ela.ylevels, 13 / 2, wsign=-1)
+        print("B4: %.2e, B6: %.2e, dist: %.3f" % (*conv.wx13_tobs(w, x), d))
+        if d < 1:
+            print("looks good...trying other side...")
+            w, x = conv.wx13_towx15(w, x)
+            levels = ff.get_levels(w, x, 15 / 2)
+            print("dist: %.3f" % ff.energy_dist(ela.zlevels, levels))
+
     ##################################################
     elif figtype == "tempdependence":
 
@@ -74,12 +105,16 @@ else:
         if site == 1:
             folders = ("Data/JinD 2", "Data/JinD 1", "Data/JinD 0")
             temps = (60, 32, 13)
+        elif site == 4:
+            folders = ("Data/JinD 3", "Data/JinD 2", "Data/JinD 1")
+            temps = (106, 60, 32)
         else:
             folders = ("Data/JinD 3", "Data/JinD 2", "Data/JinD 1", "Data/JinD 0")
             temps = (106, 60, 32, 13)
 
         spectra = [sm.read_all_2dspectra(f) for f in folders]
-        ela.plot_temperature_dependence(spectra, temps)
+        if not site == 3:
+            ela.plot_temperature_dependence(spectra, temps)
 
         if site == 1:
             plt.xlim((6275, 6600))
@@ -111,6 +146,37 @@ else:
             ela.add_empeak(2, 4)
             ela.add_empeak(3, 3)
             ela.add_empeak(5, 4)
+
+        elif site == 5:
+            plt.xlim()
+            ela.add_empeak(1, 1)
+            ela.add_empeak(2, 1)
+            ela.add_empeak(3, 1)
+            ela.add_empeak(1, 2)
+            ela.add_empeak(2, 2)
+            ela.add_empeak(3, 2)
+
+        elif site == 4:
+            plt.xlim()
+            ela.add_empeak(1, 1)
+            ela.add_empeak(2, 1)
+            ela.add_empeak(3, 1)
+            ela.add_empeak(1, 2)
+            ela.add_empeak(2, 2)
+            ela.add_empeak(3, 2)
+
+        elif site == 3:
+            linefilename = "Data/JinD 0/lines1.npy"
+            lines = np.load(linefilename, allow_pickle=True)
+            ela = la.EnergyLevelsAssignments(lines[0], lines[1])
+            spectra[3].reverse()
+
+            ela.plot_temperature_dependence(spectra, temps)
+            plt.xlim((6350, 6600))
+
+            ela.add_empeak(1, 1)
+            ela.add_empeak(1, 2)
+            ela.add_empeak(1, 3)
 
         if resolution == "highres":
             plt.savefig(fname, dpi=800, bbox_inches="tight")
@@ -245,6 +311,117 @@ else:
                 elp.plot_emline(2, 4, color=1)
                 elp.plot_emline(3, 3, color=1)
                 elp.plot_emline(5, 4, color=1)
+        if site == 3:
+            if temp == 13:
+                lines = np.load("Data/JinD 0/lines3.npy", allow_pickle=True)
+                elp.plot_exline(1, 1)
+                elp.plot_exline(1, 2)
+                elp.plot_exline(1, 3, offset=1)
+                elp.plot_exline(1, 4)
+                elp.plot_emline(1, 1)
+                elp.plot_emline(1, 1, color="y", name="?", coord=lines[1][1])
+                elp.plot_emline(1, 1, color="y", name="?", coord=lines[1][0])
+            if temp == 32:
+                lines = np.load("Data/JinD 1/lines3.npy", allow_pickle=True)
+                elp.plot_exline(1, 1)
+                elp.plot_exline(1, 2)
+                elp.plot_exline(1, 3, offset=1)
+                elp.plot_exline(1, 4)
+                elp.plot_emline(1, 1)
+                elp.plot_emline(1, 2, color=1)
+                elp.plot_emline(1, 1, color="y", name="?", coord=lines[1][1])
+                elp.plot_emline(1, 1, color="y", name="?", coord=lines[1][0])
+            if temp == 60:
+                lines = np.load("Data/JinD 2/lines3.npy", allow_pickle=True)
+                elp.plot_exline(1, 1)
+                elp.plot_exline(1, 2)
+                elp.plot_exline(1, 3, offset=1)
+                elp.plot_exline(1, 4)
+                elp.plot_emline(1, 1)
+                elp.plot_emline(1, 2, color=1)
+                elp.plot_emline(1, 4, color=1)
+                elp.plot_emline(1, 1, color="y", name="?", coord=lines[1][3])
+                elp.plot_emline(1, 1, color="y", name="?", coord=lines[1][2])
+                elp.plot_emline(1, 1, color="y", name="?", coord=lines[1][1])
+                elp.plot_emline(1, 1, color="y", name="?", coord=lines[1][0])
+            if temp == 106:
+                lines = np.load("Data/JinD 3/lines3.npy", allow_pickle=True)
+                elp.plot_exline(1, 1)
+                elp.plot_exline(1, 2)
+                elp.plot_exline(1, 3, offset=1)
+                elp.plot_exline(1, 4)
+                elp.plot_emline(1, 1)
+                elp.plot_emline(1, 2, color=1)
+                elp.plot_emline(1, 4, color=1)
+                elp.plot_emline(1, 1, color="y", name="?", coord=lines[1][3])
+                elp.plot_emline(1, 1, color="y", name="?", coord=lines[1][2])
+                elp.plot_emline(1, 1, color="y", name="?", coord=lines[1][1])
+                elp.plot_emline(1, 1, color="y", name="?", coord=lines[1][0])
+        if site == 4:
+            if temp == 13:
+                elp.plot_exline(1, 2)
+                elp.plot_exline(1, 1, fmt="--")
+                elp.plot_emline(1, 1)
+                elp.plot_emline(2, 1)
+                elp.plot_emline(3, 1)
+            if temp == 32:
+                elp.plot_exline(1, 1)
+                elp.plot_exline(1, 2)
+                elp.plot_emline(1, 1)
+                elp.plot_emline(2, 1)
+                elp.plot_emline(3, 1)
+                elp.plot_emline(1, 2, color=1)
+                elp.plot_emline(2, 2, color=1)
+            if temp == 60:
+                elp.plot_exline(1, 1)
+                elp.plot_exline(1, 2)
+                elp.plot_emline(1, 1)
+                elp.plot_emline(2, 1)
+                elp.plot_emline(3, 1)
+                elp.plot_emline(1, 2, color=1)
+                elp.plot_emline(2, 2, color=1)
+                elp.plot_emline(3, 2, color=1)
+            if temp == 106:
+                elp.plot_exline(1, 1)
+                elp.plot_exline(1, 2)
+                elp.plot_emline(1, 1)
+                elp.plot_emline(2, 1)
+                elp.plot_emline(3, 1)
+                elp.plot_emline(1, 2, color=1)
+                elp.plot_emline(2, 2, color=1)
+
+        if site == 5:
+            if temp == 13:
+                elp.plot_exline(1, 1)
+                elp.plot_exline(1, 2)
+                elp.plot_emline(1, 1)
+                elp.plot_emline(2, 1)
+                elp.plot_emline(3, 1)
+            if temp == 32:
+                elp.plot_exline(1, 1)
+                elp.plot_exline(1, 2)
+                elp.plot_emline(1, 1)
+                elp.plot_emline(2, 1)
+                elp.plot_emline(3, 1)
+                elp.plot_emline(1, 2, color=1)
+                elp.plot_emline(3, 2, color=1)
+            if temp == 60:
+                elp.plot_exline(1, 1)
+                elp.plot_exline(1, 2)
+                elp.plot_emline(1, 1)
+                elp.plot_emline(2, 1)
+                elp.plot_emline(3, 1)
+                elp.plot_emline(1, 2, color=1)
+                elp.plot_emline(2, 2, color=1)
+                elp.plot_emline(3, 2, color=1)
+            if temp == 106:
+                elp.plot_exline(1, 1)
+                elp.plot_exline(1, 2)
+                elp.plot_emline(1, 1)
+                elp.plot_emline(2, 1)
+                elp.plot_emline(3, 1)
+                elp.plot_emline(1, 2, color=1)
+                elp.plot_emline(2, 2, color=1)
 
         sm.plot_peaks(peaks)
         save("Figures/JinD_site%d_%dK.png" % (site, temp), resolution)
