@@ -4,8 +4,10 @@ import spectroscopymain as sm
 import lineanalysis as la
 import fieldfitting as ff
 import conversions as conv
-from scipy.optimize import curve_fit
+import linewidthtools as lwt
 import sys
+from scipy.optimize import curve_fit
+
 
 figtype = sys.argv[1]
 
@@ -39,6 +41,65 @@ def save(fname, resolution):
         plt.savefig(fname, dpi=300, bbox_inches="tight")
 
 
+def double_exp(x, a1, w1, a2, w2, c, b):
+    return b + np.min([a1 * np.exp((x - c) / w1), a2 * np.exp((c - x) / w2)], axis=0)
+
+
+def secondstark(E, a1, c1, w1, a2, c2, w2, fwhm, b):
+    f1 = (E > c1) * a1 * np.exp(-E / w1)
+    f2 = (E < c2) * a2 * np.exp(E / w2)
+    f1 = np.convolve(f1, lwt.lorentz(E, 1, 0, fwhm, 0, 0))[
+        int(len(E) / 2) : int(3 * len(E) / 2)
+    ]
+    f2 = np.convolve(f2, lwt.lorentz(E, 1, 0, fwhm, 0, 0))[
+        int(len(E) / 2) : int(3 * len(E) / 2)
+    ]
+    return 10 * (f1 + f2) / len(E) + b
+
+
+def site3(x, fname, resolution, dofit):
+    goodinds = np.bitwise_and(excitation > x - width, excitation < x + width)
+    ex = excitation[goodinds] - x
+    spec = spectrum[goodinds]
+    p0 = (max(spec), min(spec), 0.05, 0, 0)
+    gopt, _ = curve_fit(lwt.gauss, ex, spec, p0=p0)
+    lopt, _ = curve_fit(lwt.lorentz, ex, spec, p0=p0)
+    gr2 = lwt.rsquared(lwt.gauss, gopt, ex, spec)
+    lr2 = lwt.rsquared(lwt.lorentz, lopt, ex, spec)
+
+    print(gr2)
+    print(lr2)
+
+    plt.figure(figsize=(3.2, 3.2))
+    plt.plot(ex, spec)
+    plt.xlabel("Detuning / cm$^{-1}$")
+    plt.ylabel("PLE Intensity / a.u.")
+    save(fname, resolution)
+    plt.show()
+
+    if dofit:
+        p0 = (
+            max(spec) - min(spec),
+            0.05,
+            0.3,
+            max(spec) - min(spec),
+            -0.05,
+            0.3,
+            0.005,
+            min(spec),
+        )
+        eopt, _ = curve_fit(secondstark, ex, spec, p0=p0)
+        plt.figure(figsize=(3.2, 3.2))
+        plt.plot(ex, spec)
+        plt.plot(ex, secondstark(ex, *eopt))
+        plt.xlabel("Detuning / cm$^{-1}$")
+        plt.ylabel("PLE Intensity / a.u.")
+        plt.legend(("Observed", "Fitted"))
+        save(fname, resolution)
+        print(eopt)
+        plt.show()
+
+
 ##################################################
 if figtype == "spectrum":
     temp = temps[int(sys.argv[2])]
@@ -51,7 +112,26 @@ if figtype == "spectrum":
     save("Figures/JinD_spectrum_%dK.png" % temp, resolution)
     plt.show()
 
+##################################################
+elif figtype == "site3starkshift":
+    resolution = sys.argv[2]
+    folder = folders[2]
+    data = sm.read_all_excitation(folder)[0]
+    excitation = data.ex + 0.3
+    spectrum = data.spec
+    width = 0.7
+    nofitcenter = 0.05
+    ela = la.load_object("Data/JinD/site3.pkl")
 
+    x = ela.z1y1
+    site3(x, "Figures/Site3_y1.png", resolution, False)
+    x = ela.z1y1 + (ela.ylevels[1] + ela.ylevels[2]) / 2
+    site3(x, "Figures/Site3_y2.png", resolution, True)
+    x = ela.z1y1 + ela.ylevels[3]
+    site3(x, "Figures/Site3_y3.png", resolution, False)
+
+
+##################################################
 else:
     site = int(sys.argv[2])
     ela = la.load_object("Data/JinD/site%d.pkl" % site)
@@ -65,6 +145,7 @@ else:
         print("Y levels:")
         [print("%.1f" % l) for l in ela.ylevels]
 
+    ##################################################
     if figtype == "fitlevels":
         if not site == 3:
             w, x, d = ff.field_fit(ela.zlevels, 15 / 2, wsign=1)
@@ -95,6 +176,21 @@ else:
             w, x = conv.wx13_towx15(w, x)
             levels = ff.get_levels(w, x, 15 / 2)
             print("dist: %.3f" % ff.energy_dist(ela.zlevels, levels))
+
+    ##################################################
+    elif figtype == "linewidths":
+        temp = int(sys.argv[3])
+        folder = folders[temp]
+        data = sm.read_all_excitation(folder)[0]
+        if (temp < 2) or (temp == 3):
+            data.ex = data.ex + 1.2
+        else:
+            data.ex = data.ex + 0.3
+        if len(sys.argv) == 5:
+            width = float(sys.argv[4])
+        else:
+            width = 1.5
+        lwt.fit_expeaks(data.ex, data.spec, ela, width=width)
 
     ##################################################
     elif figtype == "tempdependence":

@@ -12,6 +12,16 @@ class Spectrum:
         self.time = time
 
 
+class Excitation:
+    """A class to store excitation spectrum data."""
+
+    def __init__(self, ex, spec, temp, sens):
+        self.ex = ex
+        self.spec = spec
+        self.temp = temp
+        self.sens = sens
+
+
 class Peaks:
     """A class to store peak data."""
 

@@ -25,11 +25,11 @@ def read_all_2dspectra(folder):
 
 
 def read_all_excitation(folder):
-    """Return a list of Spectrum objects for all the 2d spectra in a given folder.
+    """Return a list of Excitation objects for all the excitation spectra in a given
+    folder.
     Also print the number of spectra and the mean temperature of the spectra.
-    Each object has fields: 'em': emission wavelengths, 'ex': excitation
-    wavelengths, 'spec': spectrum2d data, 'temp': temperature, 'time': acquisition
-    time for spectrometer.
+    Each object has fields: 'ex': excitation
+    wavelengths, 'spec': data, 'temp': temperature, 'sens': lockin sensitivity.
     """
     spectra = rd.read_all_excitation(folder)
     if len(spectra) == 0:
@@ -158,3 +158,21 @@ def peak_heights_at_lines(data, exlines, emlines):
     # peaks = peaks - np.amin(peaks)
     # peaks = peaks / peaks[0, 0]
     return peaks
+
+
+def integrate_emission(data):
+    """Takes a list of spectra and integrates the emission axis."""
+    if type(data) is st.Spectrum:
+        spec = np.sum(data.spec, axis=0)
+        return data.ex, spec
+    elif type(data) is list:
+        presort = [integrate_emission(d) for d in data]
+        exlist = [d[0] for d in presort]
+        speclist = [d[1] for d in presort]
+        sortinds = np.argsort(np.asarray([min(e) for e in exlist]))
+        ex = np.zeros(0)
+        spec = np.zeros(0)
+        for i in range(len(sortinds)):
+            ex = np.concatenate((ex, exlist[sortinds[i]]))
+            spec = np.concatenate((spec, speclist[sortinds[i]]))
+        return ex, spec

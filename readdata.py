@@ -4,6 +4,7 @@ import yaml
 import constants as const
 import glob
 from spectrumtools import Spectrum
+from spectrumtools import Excitation
 import conversions as conv
 
 
@@ -51,14 +52,12 @@ def read_excitation(relative_filepath):
         sig = np.cos(theta) * rawdata["lockinI"] + np.sin(theta) * rawdata["lockinQ"]
         # Is this the right formula?
 
-        return {
-            # fmt:off
-            "ex": rawdata["ActualWavelength"][0],
-            "sig": sig,
-            "temp": float(temp),
-            "sens": sens
-            # fmt: on
-        }
+        return Excitation(
+            conv.nm_to_wavenumber(rawdata["NominalWavelength"][0]),
+            sig[0],
+            float(temp),
+            sens,
+        )
     except KeyError:
         raise ScanTypeError(relative_filepath)
 
