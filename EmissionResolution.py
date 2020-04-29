@@ -32,9 +32,10 @@ print([f[0] for f in fits])
 print(np.mean([f[0] for f in fits]))
 print(np.std([f[0] for f in fits]))
 
-plt.figure()
-[plt.plot(pd[0], pd[1], "b") for pd in plotdata]
+plt.figure(figsize=(5, 2))
+[plt.plot(pd[0], pd[1], "k") for pd in plotdata]
 [plt.plot(plotdata[i][0], gauss(plotdata[i][0], *fits[i]), "r--") for i in range(4)]
 plt.xlabel("Emission energy / cm$^{-1}$")
 plt.ylabel("Counts per second")
+plt.savefig("Figures/EmissionResolution.png", dpi=300, bbox_inches="tight")
 plt.show()
