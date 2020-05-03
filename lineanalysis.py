@@ -14,8 +14,6 @@ class EnergyLevelsPlot:
     def generate_figure(self, fmt):
         if fmt == "small":
             sm.plot_spectra(self.data, figsize=(3, 4.25))
-            plt.xlabel("")
-            plt.ylabel("")
         elif fmt == "large":
             sm.plot_spectra(self.data, figsize=(6, 8.5))
         self.fmt = fmt

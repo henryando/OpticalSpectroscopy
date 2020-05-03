@@ -28,8 +28,6 @@ def prep(folder):
 def plotspec(data, fmt):
     if fmt == "small":
         sm.plot_spectra(data, figsize=(3, 4.25))
-        plt.xlabel("")
-        plt.ylabel("")
     else:
         sm.plot_spectra(data, figsize=(6, 8))
 
@@ -110,6 +108,20 @@ if figtype == "spectrum":
     peaks, spectra = prep(folder)
     plotspec(spectra, size)
     save("Figures/JinD_spectrum_%dK.png" % temp, resolution)
+    plt.show()
+
+##################################################
+if figtype == "sidebands":
+    temp = temps[int(sys.argv[2])]
+    folder = folders[int(sys.argv[2])]
+    size = sys.argv[3]
+    resolution = sys.argv[4]
+
+    peaks, spectra = prep(folder)
+    plotspec(spectra, size)
+    plt.xlim((6564, 6573))
+    plt.ylim((6460, 6520))
+    save("Figures/JinD_sidebands_%dK.png" % temp, resolution)
     plt.show()
 
 ##################################################
@@ -518,6 +530,15 @@ else:
                 elp.plot_emline(3, 1)
                 elp.plot_emline(1, 2, color=1)
                 elp.plot_emline(2, 2, color=1)
+
+        if temp == 13:
+            plt.text(6470, 6700, "a)", color="k", fontsize=14)
+        if temp == 32:
+            plt.text(6470, 6700, "b)", color="k", fontsize=14)
+        if temp == 60:
+            plt.text(6470, 6700, "c)", color="k", fontsize=14)
+        if temp == 106:
+            plt.text(6470, 6700, "d)", color="k", fontsize=14)
 
         sm.plot_peaks(peaks)
         save("Figures/JinD_site%d_%dK.png" % (site, temp), resolution)
